@@ -59,36 +59,6 @@ func fileWrite(file string, data string) bool {
     return true;
 }
 
-func colourString(str string, colour string, isBold bool) string {
-    var code string;
-
-    switch colour {
-        case "black":
-            code = ";30";
-        case "red":
-            code = ";31";
-        case "green":
-            code = ";32";
-        case "yellow":
-            code = ";33";
-        case "gray":
-            fallthrough;
-        case "grey":
-            code = ";37";
-        default:
-            code = "";
-    }
-
-    var boldness string;
-    if (isBold) {
-        boldness = "1";
-    } else {
-        boldness = "0";
-    }
-
-    return "\033[" + boldness + code + "m" + str + "\033[0m";
-}
-
 func getLastFetchTime() int {
     var file string = dotGit() + "/git_radar_last_fetch_time";
 

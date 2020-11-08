@@ -1,0 +1,5 @@
+*.swp
+*.swo
+
+config.go
+git-radar

@@ -1,0 +1,29 @@
+package main
+
+// Number of seconds to wait before fetches
+var GIT_RADAR_FETCH_TIME int = 5 * 60;
+
+// Pad the git-radar prompt with these
+var PREFIX string = "  ";
+var SUFFIX string = " ";
+
+// printf style string to format different repo States
+var REMOTE_AHEAD        string = MASTER_SYMBOL + " \x01\033[1;32m\x02←\x01\033[0m\x02 %d ";
+var REMOTE_BEHIND       string = MASTER_SYMBOL + " %d \x01\033[1;31m\x02→\x01\033[0m\x02 ";
+var REMOTE_DIVERGED     string = MASTER_SYMBOL + " %d \x01\033[1;33m\x02⇄\x01\033[0m\x02 %d ";
+var REMOTE_NOT_UPSTREAM string = "upstream \x01\033[1;31m\x02⚡\x01\033[0m\x02 %s";
+var LOCAL_AHEAD         string = " %d\x01\033[1;32m\x02↑\x01\033[0m\x02";
+var LOCAL_BEHIND        string = " %d\x01\033[1;31m\x02↓\x01\033[0m\x02";
+var LOCAL_DIVERGED      string = " %d\x01\033[1;33m\x02⇵\x01\033[0m\x02%d";
+var CHANGES_STAGED      string = "%d\x01\033[1;32m\x02%s\x01\033[0m\x02";
+var CHANGES_UNSTAGED    string = "%d\x01\033[1;31m\x02%s\x01\033[0m\x02";
+var CHANGES_CONFLICTED  string = "%d\x01\033[1;33m\x02%s\x01\033[0m\x02";
+var CHANGES_UNTRACKED   string = "%d\x01\033[1;37m\x02%s\x01\033[0m\x02";
+var STASH_FORMAT        string = " %d\x01\033[1;33m\x02≡\x01\033[0m\x02";
+var BRANCH_FORMAT       string = "\x01\033[0m\x02%s\x01\033[0m\x02";
+
+// Fancy M symbol used for remote ahead/behind/diverged
+var MASTER_SYMBOL       string = "\x01\033[0m\x02\xF0\x9D\x98\xAE\x01\033[0m\x02";
+
+// Git radar prompt format
+var PROMPT_FORMAT       string = "%s\x01\033[1;30m\x02git:(\x01\033[0m\x02%s%s%s\x01\033[1;30m\x02)\x01\033[0m\x02%s%s%s";

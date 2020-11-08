@@ -2,10 +2,8 @@ package main
 
 import (
     "fmt"
-    "regexp"
     "strconv"
     "os"
-    "os/exec"
     "io/ioutil"
     "time"
     "strings"
@@ -15,22 +13,22 @@ func getArgs() []string {
     return os.Args[1:];
 }
 
-func now() int {
-    return int(time.Now().Unix());
+func now() uint {
+    return uint(time.Now().Unix());
 }
 
-func str2int(str string) int {
-    ret, err := strconv.Atoi(str);
+func str2int(str string) uint {
+    ret, err := strconv.ParseUint(str, 10, 32);
 
     if (err != nil) {
-        panic("String [" + str + "] could not be converted to an int");
+        panic("String [" + str + "] could not be converted to an uint");
     }
 
-    return ret;
+    return uint(ret);
 }
 
-func int2str(num int) string {
-    return strconv.Itoa(num);
+func int2str(num uint) string {
+    return fmt.Sprintf("%d", num);
 }
 
 func fileExists(file string) bool {
@@ -59,231 +57,154 @@ func fileWrite(file string, data string) bool {
     return true;
 }
 
-func getLastFetchTime() int {
-    var file string = dotGit() + "/git_radar_last_fetch_time";
-
-    // Check if file exists
-    if (!fileExists(file)) {
-        return 0;
-    }
-
-    return str2int(fileRead(file));
-}
-
-func recordNewFetchTime() bool {
-    var file string = dotGit() + "/git_radar_last_fetch_time";
-    var now  int    = now();
-
-    fileWrite(file, int2str(now));
-    return true;
-}
-
 func trim(str string) string {
     return strings.TrimSpace(string(str));
 }
 
-func runCmdConcurrent(cmdStr string) {
-    var cmdArgs []string = strings.Split(cmdStr, " ");
-    cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...);
-    err := cmd.Start();
-
-    if (err != nil) {
-        panic("Concurrent command [" + cmdStr + "] failed.");
-    }
-}
-
-func runCmdNoTrim(cmdStr string) (string, error) {
-    var cmdArgs []string = strings.Split(cmdStr, " ");
-    cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...);
-    out, err := cmd.Output();
-
-    return string(out), err;
-}
-
-func runCmd(cmdStr string) (string, error) {
-    o, e := runCmdNoTrim(cmdStr);
-
-    return trim(o), e;
-}
-
-func getRemoteInfo() string {
-    var remoteBranch string = getRemoteBranchName();
-
-    if (remoteBranch == "") {
-        return "";
+func getRemoteInfo(remoteBehind uint, remoteAhead uint) string {
+    if (remoteBehind > 0 && remoteAhead > 0) {
+        return fmt.Sprintf(REMOTE_DIVERGED, remoteBehind, remoteAhead);
     }
 
-    var parentRemote string = getParentRemote();
-
-    var behindBy int = howFarBehindRemote(remoteBranch, parentRemote);
-    var aheadBy int = howFarAheadRemote(remoteBranch, parentRemote);
-
-    if (behindBy > 0 && aheadBy > 0) {
-        return showRemoteDiverged(behindBy, aheadBy);
+    if (remoteAhead > 0) {
+        return fmt.Sprintf(REMOTE_AHEAD, remoteAhead);
     }
 
-    if (aheadBy > 0) {
-        return showRemoteAhead(aheadBy);
-    }
-
-    if (behindBy > 0) {
-        return showRemoteBehind(behindBy);
+    if (remoteBehind > 0) {
+        return fmt.Sprintf(REMOTE_BEHIND, remoteBehind);
     }
 
     return "";
 }
 
-func getBranchInfo() string {
-    var remoteBranch string = getRemoteBranchName();
-
+func getBranchInfo(remoteBranch string, localBranch string) string {
     if (remoteBranch == "") {
-        return fmt.Sprintf(REMOTE_NOT_UPSTREAM, getLocalBranchName());
+        return fmt.Sprintf(REMOTE_NOT_UPSTREAM, localBranch);
     }
 
-    return fmt.Sprintf(BRANCH_FORMAT, getLocalBranchName());
+    return fmt.Sprintf(BRANCH_FORMAT, localBranch);
 }
 
-func getLocalInfo() string {
-    var remoteBranch string = getRemoteBranchName();
-
-    if (remoteBranch == "") {
-        return "";
+func getLocalInfo(localBehind uint, localAhead uint) string {
+    if (localBehind > 0 && localAhead > 0) {
+        return fmt.Sprintf(LOCAL_DIVERGED, localBehind, localAhead);
     }
 
-    var behindBy int = howFarBehindLocal(remoteBranch);
-    var aheadBy int = howFarAheadLocal(remoteBranch);
-
-    if (behindBy > 0 && aheadBy > 0) {
-        return showLocalDiverged(behindBy, aheadBy);
+    if (localAhead > 0) {
+        return fmt.Sprintf(LOCAL_AHEAD, localAhead);
     }
 
-    if (aheadBy > 0) {
-        return showLocalAhead(aheadBy);
-    }
-
-    if (behindBy > 0) {
-        return showLocalBehind(behindBy);
+    if (localBehind > 0) {
+        return fmt.Sprintf(LOCAL_BEHIND, localBehind);
     }
 
     return "";
 }
 
-func getStashInfo() string {
-    out, err := runCmd("git stash list");
-    if (err != nil) {
-        panic("Failed to get stash info: " + err.Error());
+func getChangeInfo(gitStatus GitStatus) string {
+    var staged     string = showStaged(gitStatus);
+    var unstaged   string = showUnstaged(gitStatus);
+    var conflicted string = showConflicted(gitStatus);
+    var untracked  string;
+
+
+    untracked = "";
+    if (gitStatus.untracked != 0) {
+        untracked = " " + fmt.Sprintf(CHANGES_UNTRACKED, gitStatus.untracked, "A");
     }
 
-    if (out == "") {
+    return staged + conflicted + unstaged + untracked;
+}
+
+func showConflicted(gitStatus GitStatus) string {
+    var conflicted string = "";
+
+    if (gitStatus.conflictUs > 0) {
+        conflicted += fmt.Sprintf(CHANGES_CONFLICTED, gitStatus.conflictUs, "U");
+    }
+
+    if (gitStatus.conflictThem > 0) {
+        conflicted += fmt.Sprintf(CHANGES_CONFLICTED, gitStatus.conflictThem, "T");
+    }
+
+    if (gitStatus.conflictBoth > 0) {
+        conflicted += fmt.Sprintf(CHANGES_CONFLICTED, gitStatus.conflictBoth, "B");
+    }
+
+    if (conflicted == "") {
+        return "";
+    }
+    return " " + conflicted;
+}
+
+func showStaged(gitStatus GitStatus) string {
+    var staged string = "";
+
+    if (gitStatus.stagedAdded > 0) {
+        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedAdded, "A");
+    }
+
+    if (gitStatus.stagedDeleted > 0) {
+        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedDeleted, "D");
+    }
+
+    if (gitStatus.stagedModified > 0) {
+        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedModified, "M");
+    }
+
+    if (gitStatus.stagedRenamed > 0) {
+        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedRenamed, "R");
+    }
+
+    if (gitStatus.stagedCopied > 0) {
+        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedCopied, "C");
+    }
+
+    if (gitStatus.stagedTypeChanged > 0) {
+        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedTypeChanged, "TC");
+    }
+
+    if (staged == "") {
         return "";
     }
 
-    var count int = strings.Count(out, "\n") + 1;
-
-    return showStash(count);
+    return " " + staged;
 }
 
-func getChangeInfo() string {
-    porcelain, err := runCmdNoTrim("git status --porcelain");
-    if (err != nil) {
-        panic("Couldn't get status: " + err.Error());
+func showUnstaged(gitStatus GitStatus) string {
+    var unstaged string = "";
+
+    if (gitStatus.unstagedDeleted > 0) {
+        unstaged += fmt.Sprintf(CHANGES_UNSTAGED, gitStatus.unstagedDeleted, "D");
     }
 
-    if (porcelain == "") {
+    if (gitStatus.unstagedModified > 0) {
+        unstaged += fmt.Sprintf(CHANGES_UNSTAGED, gitStatus.unstagedModified, "M");
+    }
+
+    if (gitStatus.unstagedTypeChanged > 0) {
+        unstaged += fmt.Sprintf(CHANGES_UNSTAGED, gitStatus.unstagedTypeChanged, "TC");
+    }
+
+    if (unstaged == "") {
         return "";
     }
-
-    var staged_changes     string = stagedStatus(porcelain);
-    var unstaged_changes   string = unstagedStatus(porcelain);
-    var conflicted_changes string = conflictedStatus(porcelain);
-    var untracked_changes  string = untrackedStatus(porcelain);
-
-    return staged_changes + conflicted_changes + unstaged_changes + untracked_changes;
+    return " " + unstaged;
 }
 
-func bool2int(boolean bool) int {
-    if (boolean) {
-        return 1;
-    }
-    return 0;
-}
+func showPrompt(git GitData) string {
+    remote := getRemoteInfo(git.remoteBehind, git.remoteAhead);
+    branch := getBranchInfo(git.remoteBranch, git.localBranch);
+    local  := getLocalInfo(git.localBehind, git.localAhead);
 
-func untrackedStatus(gitStatus string) string {
-    var untracked int = 0;
+    var stash string;
 
-    for _, line := range strings.Split(gitStatus, "\n") {
-        match1, _    := regexp.MatchString("^\\?\\? ", line);
-        untracked += bool2int(match1);
+    stash = "";
+    if (git.stash != 0) {
+        stash = fmt.Sprintf(STASH_FORMAT, git.stash);
     }
 
-    return showUntracked(untracked);
-}
+    change := getChangeInfo(git.status);
 
-func conflictedStatus(gitStatus string) string {
-    var filesUs    int = 0;
-    var filesThem  int = 0;
-    var filesBoth  int = 0;
-
-    for _, line := range strings.Split(gitStatus, "\n") {
-        match1, _    := regexp.MatchString("^[^U]U ", line);
-        filesUs += bool2int(match1);
-
-        match2, _     := regexp.MatchString("^U[^U] ", line);
-        filesThem += bool2int(match2);
-
-        match3, _ := regexp.MatchString("^(UU|AA|DD) ", line);
-        filesBoth += bool2int(match3);
-    }
-
-    return showConflicted(filesUs, filesThem, filesBoth);
-}
-
-func unstagedStatus(gitStatus string) string {
-    var filesModified    int = 0;
-    var filesDeleted     int = 0;
-    var filesTypeChanged int = 0;
-
-    for _, line := range strings.Split(gitStatus, "\n") {
-        match1, _    := regexp.MatchString("^[^M]M ", line);
-        filesModified += bool2int(match1);
-
-        match2, _     := regexp.MatchString("^[^D]D ", line);
-        filesDeleted += bool2int(match2);
-
-        match3, _ := regexp.MatchString("^[^T]T ", line);
-        filesTypeChanged += bool2int(match3);
-    }
-
-    return showUnstaged(filesDeleted, filesModified, filesTypeChanged);
-}
-
-func stagedStatus(gitStatus string) string {
-    var filesModified    int = 0;
-    var filesAdded       int = 0;
-    var filesDeleted     int = 0;
-    var filesRenamed     int = 0;
-    var filesCopied      int = 0;
-    var filesTypeChanged int = 0;
-
-    for _, line := range strings.Split(gitStatus, "\n") {
-        match1, _    := regexp.MatchString("^M[^M] ", line);
-        filesModified += bool2int(match1);
-
-        match2, _       := regexp.MatchString("^A[^A] ", line);
-        filesAdded += bool2int(match2);
-
-        match3, _     := regexp.MatchString("^D[^D] ", line);
-        filesDeleted += bool2int(match3);
-
-        match4, _     := regexp.MatchString("^R[^R] ", line);
-        filesRenamed += bool2int(match4);
-
-        match5, _      := regexp.MatchString("^C[^C] ", line);
-        filesCopied += bool2int(match5);
-
-        match6, _ := regexp.MatchString("^T[^T] ", line);
-        filesTypeChanged += bool2int(match6);
-    }
-
-    return showStaged(filesAdded, filesDeleted, filesModified, filesRenamed, filesCopied, filesTypeChanged);
+    return fmt.Sprintf(PROMPT_FORMAT, PREFIX, remote, branch, local, stash, change, SUFFIX);
 }

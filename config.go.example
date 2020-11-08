@@ -1,7 +1,7 @@
 package main
 
 // Number of seconds to wait before fetches
-var GIT_RADAR_FETCH_TIME int = 5 * 60;
+var GIT_RADAR_FETCH_TIME uint = 5 * 60;
 
 // Pad the git-radar prompt with these
 var PREFIX string = "  ";

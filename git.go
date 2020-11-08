@@ -153,56 +153,41 @@ func getParentRemote() string {
     return out2;
 }
 
-func howFarAheadRemote(remoteBranch string, parentRemote string) uint {
-    if (remoteBranch == "" || parentRemote == "" || remoteBranch == parentRemote) {
+func aheadBehindHelper(toBranch string, fromBranch string, isAhead bool) uint {
+    if (toBranch == "" || fromBranch == "" || toBranch == fromBranch) {
         return 0;
     }
 
-    out, err := runCmd("git rev-list --right-only --count " + parentRemote + "..." + remoteBranch);
+    var side string;
+
+    if (isAhead) {
+        side = "right-only";
+    } else {
+        side = "left-only";
+    }
+
+    out, err := runCmd("git rev-list --" + side + " --count " + fromBranch + "..." + toBranch);
     if (err != nil) {
         return 0;
     }
 
     return str2int(out);
+}
+
+func howFarAheadRemote(remoteBranch string, parentRemote string) uint {
+    return aheadBehindHelper(remoteBranch, parentRemote, true);
 }
 
 func howFarBehindRemote(remoteBranch string, parentRemote string) uint {
-    if (remoteBranch == "" || parentRemote == "" || remoteBranch == parentRemote) {
-        return 0;
-    }
-
-    out, err := runCmd("git rev-list --left-only --count " + parentRemote + "..." + remoteBranch);
-    if (err != nil) {
-        return 0;
-    }
-
-    return str2int(out);
+    return aheadBehindHelper(remoteBranch, parentRemote, false);
 }
 
 func howFarAheadLocal(remoteBranch string) uint {
-    if (remoteBranch == "") {
-        return 0;
-    }
-
-    out, err := runCmd("git rev-list --right-only --count " + remoteBranch + "...HEAD");
-    if (err != nil) {
-        return 0;
-    }
-
-    return str2int(out);
+    return aheadBehindHelper("HEAD", remoteBranch, true);
 }
 
 func howFarBehindLocal(remoteBranch string) uint {
-    if (remoteBranch == "") {
-        return 0;
-    }
-
-    out, err := runCmd("git rev-list --left-only --count " + remoteBranch + "...HEAD");
-    if (err != nil) {
-        return 0;
-    }
-
-    return str2int(out);
+    return aheadBehindHelper("HEAD", remoteBranch, false);
 }
 
 func ezRegex(regex string, target string) bool {

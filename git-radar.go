@@ -5,14 +5,6 @@ import (
 )
 
 func main() {
-    // Get important git information about this current repo we are in
-    Git := getGitData();
-
-    // if not a repo, then nothing to do. Exit silently
-    if (!Git.isRepo) {
-        return;
-    }
-
     args := getArgs();
     var isFetch bool = false;
 
@@ -26,6 +18,14 @@ func main() {
             default:
                 panic("Error: [" + command + "] is an unknown option to git-radar");
         }
+    }
+
+    // Get important git information about this current repo we are in
+    Git := getGitData();
+
+    // if not a repo, then nothing to do. Exit silently
+    if (!Git.isRepo) {
+        return;
     }
 
     if (isFetch) {

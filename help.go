@@ -3,89 +3,85 @@ package main
 import (
     "fmt"
 )
+
+// This function prints out the help for this tool
 func help() {
+    prompts := []string {
+        showPrompt(GitData{
+            remoteBranch: "origin/master",
+            localBranch: "master",
+        }),
+        showPrompt(GitData{
+            localBranch: "my-branch",
+        }),
+        showPrompt(GitData{
+            remoteBranch: "origin/my-branch",
+            localBranch: "my-branch",
+            status: GitStatus{
+                untracked: 2,
+            },
+        }),
+        showPrompt(GitData{
+            remoteBranch: "origin/my-branch",
+            localBranch: "my-branch",
+            status: GitStatus{
+                stagedAdded:      1,
+                unstagedModified: 3,
+            },
+        }),
+        showPrompt(GitData{
+            remoteBranch: "origin/my-branch",
+            localBranch: "my-branch",
+            remoteBehind: 2,
+            localAhead: 3,
+        }),
+        showPrompt(GitData{
+            remoteBranch: "origin/my-branch",
+            localBranch: "my-branch",
+            remoteBehind: 2,
+            remoteAhead: 3,
+        }),
+        showPrompt(GitData{
+            localBranch: "detached@94eac67",
+            status: GitStatus{
+                conflictThem: 2,
+                conflictUs:   3,
+            },
+        }),
+        showPrompt(GitData{
+            remoteBranch: "origin/my-branch",
+            localBranch: "my-branch",
+            remoteBehind: 2,
+            remoteAhead: 3,
+            localBehind: 3,
+            localAhead: 5,
+        }),
+        showPrompt(GitData{
+            remoteBranch: "origin/my-branch",
+            localBranch: "my-branch",
+            remoteAhead: 3,
+        }),
+        showPrompt(GitData{
+            remoteBranch: "origin/my-branch",
+            localBranch: "my-branch",
+            stash: 3,
+        }),
+    };
+
     fmt.Println("git-radar - a heads up display for git");
     fmt.Println("");
     fmt.Println("examples:");
 
-    fmt.Print(showPrompt(GitData{
-        remoteBranch: "origin/master",
-        localBranch: "master",
-    }));
-    fmt.Println("                            # You are on the master branch and everything is clean");
-
-    fmt.Print(showPrompt(GitData{
-        localBranch: "my-branch",
-    }));
-    fmt.Println("              # Fresh branch that we haven't pushed upstream");
-
-    fmt.Print(showPrompt(GitData{
-        remoteBranch: "origin/my-branch",
-        localBranch: "my-branch",
-        status: GitStatus{
-            untracked: 2,
-        },
-    }));
-    fmt.Println("                      # Two files created that aren't tracked by git");
-
-    fmt.Print(showPrompt(GitData{
-        remoteBranch: "origin/my-branch",
-        localBranch: "my-branch",
-        status: GitStatus{
-            stagedAdded:      1,
-            unstagedModified: 3,
-        },
-    }));
-    fmt.Println("                   # 1 new file staged to commit and 3 modifications that we still need to `git add`");
-
-    fmt.Print(showPrompt(GitData{
-        remoteBranch: "origin/my-branch",
-        localBranch: "my-branch",
-        remoteBehind: 2,
-        localAhead: 3,
-    }));
-    fmt.Println("                # 3 commits made locally ready to push up while master is ahead of us by 2");
-
-    fmt.Print(showPrompt(GitData{
-        remoteBranch: "origin/my-branch",
-        localBranch: "my-branch",
-        remoteBehind: 2,
-        remoteAhead: 3,
-    }));
-    fmt.Println("                 # our commits pushed up, master and my-branch have diverged");
-
-    fmt.Print(showPrompt(GitData{
-        localBranch: "detached@94eac67",
-        status: GitStatus{
-            conflictThem: 2,
-            conflictUs:   3,
-        },
-    }));
-    fmt.Println("  # mid rebase, we are detached and have 3 conflicts caused by US and 2 caused by THEM");
-
-    fmt.Print(showPrompt(GitData{
-        remoteBranch: "origin/my-branch",
-        localBranch: "my-branch",
-        remoteBehind: 2,
-        remoteAhead: 3,
-        localBehind: 3,
-        localAhead: 5,
-    }));
-    fmt.Println("             # rebase complete, our rewritten commits now need pushed up");
-
-    fmt.Print(showPrompt(GitData{
-        remoteBranch: "origin/my-branch",
-        localBranch: "my-branch",
-        remoteAhead: 3,
-    }));
-    fmt.Println("                   # origin/my-branch is up to date with master and has our 3 commits waiting merge");
-
-    fmt.Print(showPrompt(GitData{
-        remoteBranch: "origin/my-branch",
-        localBranch: "my-branch",
-        stash: 3,
-    }));
-    fmt.Println("                      # You have 3 stashes stored");
+    fmt.Println(prompts[0], "\t\t\t\t# You are on the master branch and everything is clean");
+    fmt.Println(prompts[1], "\t\t\t# Fresh branch that we haven't pushed upstream");
+    fmt.Println(prompts[2], "\t\t\t\t# Two files created that aren't tracked by git");
+    fmt.Println(prompts[3], "\t\t\t# 1 new file staged to commit and 3 modifications that we still need to `git add`");
+    fmt.Println(prompts[4], "\t\t\t# 3 commits made locally ready to push up while master is ahead of us by 2");
+    fmt.Println(prompts[5], "\t\t\t# our commits pushed up, master and my-branch have diverged");
+    fmt.Println(prompts[6], "\t# mid rebase, we are detached and have 3 conflicts caused by US and 2 caused by THEM");
+    fmt.Println(prompts[7], "\t\t\t# rebase complete, our rewritten commits now need pushed up");
+    fmt.Println(prompts[8], "\t\t\t# origin/my-branch is up to date with master and has our 3 commits waiting merge");
+    fmt.Println(prompts[9], "\t\t\t\t# You have 3 stashes stored");
 
     fmt.Println("");
     fmt.Println("usage:");

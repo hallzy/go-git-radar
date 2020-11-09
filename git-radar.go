@@ -5,6 +5,7 @@ import (
 )
 
 func main() {
+    // Get important git information about this current repo we are in
     Git := getGitData();
 
     // if not a repo, then nothing to do. Exit silently
@@ -31,5 +32,6 @@ func main() {
         fetch(Git.dotGit);
     }
 
+    // Print out the prompt with the given Git data
     fmt.Print(showPrompt(Git) + "\n");
 }

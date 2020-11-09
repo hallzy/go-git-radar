@@ -3,46 +3,20 @@ package main
 import (
     "strings"
     "os/exec"
-    "regexp"
 )
 
-type GitData struct {
-    isRepo       bool
-    dotGit       string
-    localBranch  string
-    remoteBranch string
-    parentBranch string
-    remoteAhead  uint
-    remoteBehind uint
-    localAhead   uint
-    localBehind  uint
-    status       GitStatus
-    stash        uint
-}
+// =============================================================================
+// ALL FUNCTIONS IN THIS FILE PERFORM SIDE EFFECTS
+// =============================================================================
 
-type GitStatus struct {
-    untracked uint
-
-    stagedAdded       uint
-    stagedDeleted     uint
-    stagedModified    uint
-    stagedRenamed     uint
-    stagedCopied      uint
-    stagedTypeChanged uint
-
-    unstagedDeleted     uint
-    unstagedModified    uint
-    unstagedTypeChanged uint
-
-    conflictUs   uint
-    conflictThem uint
-    conflictBoth uint
-}
-
+// This function populates a GitData structure with current git information
 func getGitData() GitData {
+    // Get the location of the .git folder
     var dotGit string = dotGit();
     var isRepo bool   = dotGit != "";
 
+    // If we aren't in a repo, then don't bother continuing. Just set that this
+    // isn't a repo
     if (!isRepo) {
         return GitData {
             isRepo: isRepo,
@@ -50,10 +24,12 @@ func getGitData() GitData {
         }
     }
 
+    // This is a repo, so set everything else
+
+    // Save these in variables as they are needed for function calls below
     var localBranch  string = getLocalBranchName();
     var remoteBranch string = getRemoteBranchName(localBranch);
     var parentBranch string = getParentRemote();
-
 
     return GitData {
         isRepo:       isRepo,
@@ -70,7 +46,7 @@ func getGitData() GitData {
     };
 }
 
-// Returns whether or not this is a repo, and the location of the .git folder
+// Returns the path to the .git folder for the CWD
 func dotGit() string {
     out, err := runCmd("git rev-parse --git-dir");
     if (err != nil) {
@@ -80,67 +56,91 @@ func dotGit() string {
     return out;
 }
 
-// returns true if a fetch was made, and false otherwise
+// Runs git fetch if enough time has passed
 func fetch(dotGit string) bool {
     var now                uint = now();
+
+    // How long has it been since the last fetch was made?
     var secSinceLastFetch  uint = now - getLastFetchTime(dotGit);
 
+    // If it hasn't been GIT_RADAR_FETCH_TIME seconds since the last fetch yet,
+    // then don't fetch
     if (secSinceLastFetch < GIT_RADAR_FETCH_TIME) {
         return false
     }
 
+    // run the fetch, and save the new fetch time in the fetch time file
     runCmdConcurrent("git fetch --quiet");
-
     recordNewFetchTime(dotGit);
+
     return true;
 }
 
+// Gets the currently checked out branch name
 func getLocalBranchName() string {
+    // If no errors, then local branch is the result of the below command
     out1, err := runCmd("git symbolic-ref --short HEAD");
     if (err == nil) {
         return out1;
     }
 
+    // If an error occurred above, then run this command which will give us a
+    // short hash
     out2, err := runCmd("git rev-parse --short HEAD");
     if (err != nil) {
         panic("Failed to retrieve branch name: " + err.Error());
     }
+
+    // Return the hash and state detached head
     return "detached@" + out2;
 }
 
+// Get the name of the remote tracking branch
 func getRemoteBranchName(localBranch string) string {
+    // For the input branch, find out what the remote name is for it (probably
+    // origin)
     remote, err := runCmd("git config --get branch." + localBranch + ".remote");
     if (err != nil) {
         return "";
     }
 
+    // If no remote, then assume no remote branch tracking
     if (remote == "") {
         return "";
     }
 
+    // Get the branch name that the local branch tracks at the remote we found
+    // above
     out, err := runCmd("git config --get branch." + localBranch + ".merge");
     if (err != nil) {
         return "";
     }
 
-    // Remove refs/heads/
+    // The above will prefix the branch with 'refs/heads/'. We don't care about
+    // that, so remove it
     var remoteMergeBranch string = strings.Replace(out, "refs/heads/", "", -1);
     if (remoteMergeBranch == "") {
         return "";
     }
 
+    // Return the remote and branch name together
     return remote + "/" + remoteMergeBranch;
 }
 
 // Get the remote branch that the current branch is based on
 func getParentRemote() string {
+    // Every branch is based on something, so if we can't find what that is,
+    // assume we are basing it off of origin master
     var defaultRemote string = "origin/master";
 
+    // Get the name of the currently checked out branch
     out1, err := runCmd("git rev-parse --abbrev-ref HEAD");
     if (err != nil) {
         return defaultRemote;
     }
 
+    // Check to see if we have a git-radar tracking config to see if the parent
+    // remote branch was saved
     out2, err := runCmd("git config --local branch." + out1 + ".git-radar-tracked-remote");
     if (err != nil) {
         return defaultRemote;
@@ -153,13 +153,18 @@ func getParentRemote() string {
     return out2;
 }
 
+// Common function for checking how far ahead/behind remote/local is.
 func aheadBehindHelper(toBranch string, fromBranch string, isAhead bool) uint {
+    // If any of the branches are empty, or the branches are the same then there
+    // is nothing to show.
     if (toBranch == "" || fromBranch == "" || toBranch == fromBranch) {
         return 0;
     }
 
     var side string;
 
+    // If we are checking how far ahead, then we want to use the --right-only
+    // option, otherwise --left-only
     if (isAhead) {
         side = "right-only";
     } else {
@@ -190,11 +195,8 @@ func howFarBehindLocal(remoteBranch string) uint {
     return aheadBehindHelper("HEAD", remoteBranch, false);
 }
 
-func ezRegex(regex string, target string) bool {
-    ret, _    := regexp.MatchString(regex, target);
-    return ret;
-}
-
+// Get the results of a git status of the current repo and parse the results
+// into the GitStatus structure
 func getGitStatus() GitStatus {
     porcelain, err := runCmdNoTrim("git status --porcelain");
     if (err != nil) {
@@ -205,46 +207,14 @@ func getGitStatus() GitStatus {
         return GitStatus{};
     }
 
-    ret := GitStatus{};
+    // Split the string on new lines so that we have a list of lines of output
     lines := strings.Split(porcelain, "\n");
 
-    for _, line := range lines {
-        // STAGED
-        if (ezRegex("^M[^M] ", line)) {
-            ret.stagedModified += 1;
-        } else if (ezRegex("^A[^A] ", line)) {
-            ret.stagedAdded += 1;
-        } else if (ezRegex("^D[^D] ", line)) {
-            ret.stagedDeleted += 1;
-        } else if (ezRegex("^R[^R] ", line)) {
-            ret.stagedRenamed += 1;
-        } else if (ezRegex("^C[^C] ", line)) {
-            ret.stagedCopied += 1;
-        } else if (ezRegex("^T[^T] ", line)) {
-            ret.stagedTypeChanged += 1;
-        // UNSTAGED
-        } else if (ezRegex("^[^M]M ", line)) {
-            ret.unstagedModified += 1;
-        } else if (ezRegex("^[^D]D ", line)) {
-            ret.unstagedDeleted += 1;
-        } else if (ezRegex("^[^T]T ", line)) {
-            ret.unstagedTypeChanged += 1;
-        // CONFLICT
-        } else if (ezRegex("^[^U]U ", line)) {
-            ret.conflictUs += 1;
-        } else if (ezRegex("^U[^U] ", line)) {
-            ret.conflictThem += 1;
-        } else if (ezRegex("(UU|AA|DD)", line)) {
-            ret.conflictBoth += 1;
-        // UNTRACKED
-        } else if (ezRegex("^\\?\\? ", line)) {
-            ret.untracked += 1;
-        }
-    }
-
-    return ret;
+    // parse the lines and add everything to a GitStatus structure
+    return parseGitStatus(lines);
 }
 
+// Run git stash and count how many stashes there are
 func gitStash() uint {
     out, err := runCmdNoTrim("git stash list");
     if (err != nil) {
@@ -258,10 +228,10 @@ func gitStash() uint {
     return uint(strings.Count(out, "\n"));
 }
 
+// Read the fetch time file to see when the last fetch was run
 func getLastFetchTime(dotGit string) uint {
     var file string = dotGit + "/git_radar_last_fetch_time";
 
-    // Check if file exists
     if (!fileExists(file)) {
         return 0;
     }
@@ -269,6 +239,7 @@ func getLastFetchTime(dotGit string) uint {
     return str2int(fileRead(file));
 }
 
+// Record a new fetch time in the fetch time file
 func recordNewFetchTime(dotGit string) bool {
     var file string = dotGit + "/git_radar_last_fetch_time";
     var now  uint    = now();
@@ -277,6 +248,7 @@ func recordNewFetchTime(dotGit string) bool {
     return true;
 }
 
+// Run a command, but don't wait for it to finish
 func runCmdConcurrent(cmdStr string) {
     var cmdArgs []string = strings.Split(cmdStr, " ");
     cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...);
@@ -287,6 +259,7 @@ func runCmdConcurrent(cmdStr string) {
     }
 }
 
+// Run a command, but don't trim the output
 func runCmdNoTrim(cmdStr string) (string, error) {
     var cmdArgs []string = strings.Split(cmdStr, " ");
     cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...);
@@ -295,9 +268,9 @@ func runCmdNoTrim(cmdStr string) (string, error) {
     return string(out), err;
 }
 
+// Run a command, trim the output
 func runCmd(cmdStr string) (string, error) {
     o, e := runCmdNoTrim(cmdStr);
 
     return trim(o), e;
 }
-

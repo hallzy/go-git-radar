@@ -3,20 +3,11 @@ package main
 import (
     "fmt"
     "strconv"
-    "os"
-    "io/ioutil"
-    "time"
     "strings"
+    "regexp"
 )
 
-func getArgs() []string {
-    return os.Args[1:];
-}
-
-func now() uint {
-    return uint(time.Now().Unix());
-}
-
+// Helper to convert a numeric string to an unsigned int
 func str2int(str string) uint {
     ret, err := strconv.ParseUint(str, 10, 32);
 
@@ -27,40 +18,18 @@ func str2int(str string) uint {
     return uint(ret);
 }
 
+// Helper to convert an unsigned int to a string
 func int2str(num uint) string {
     return fmt.Sprintf("%d", num);
 }
 
-func fileExists(file string) bool {
-    _, err := os.Stat(file);
-
-    return ! os.IsNotExist(err);
-}
-
-func fileRead(file string) string {
-    ret, err := ioutil.ReadFile(file);
-
-    if (err != nil) {
-        panic(err.Error());
-    }
-
-    return string(ret);
-}
-
-func fileWrite(file string, data string) bool {
-    err := ioutil.WriteFile(file, []byte(data), 0664);
-
-    if (err != nil) {
-        panic(err.Error());
-    }
-
-    return true;
-}
-
+// Helper to trim a string
 func trim(str string) string {
     return strings.TrimSpace(string(str));
 }
 
+// Given how many commits behind or ahead, return the formatted string used in
+// the prompt for remote info
 func getRemoteInfo(remoteBehind uint, remoteAhead uint) string {
     if (remoteBehind > 0 && remoteAhead > 0) {
         return fmt.Sprintf(REMOTE_DIVERGED, remoteBehind, remoteAhead);
@@ -77,14 +46,17 @@ func getRemoteInfo(remoteBehind uint, remoteAhead uint) string {
     return "";
 }
 
+// Return the formatted prompt string for branch information
 func getBranchInfo(remoteBranch string, localBranch string) string {
     if (remoteBranch == "") {
+        // If no remote, report the local branch as no upstream
         return fmt.Sprintf(REMOTE_NOT_UPSTREAM, localBranch);
     }
 
     return fmt.Sprintf(BRANCH_FORMAT, localBranch);
 }
 
+// Return the formatted prompt string for local info
 func getLocalInfo(localBehind uint, localAhead uint) string {
     if (localBehind > 0 && localAhead > 0) {
         return fmt.Sprintf(LOCAL_DIVERGED, localBehind, localAhead);
@@ -101,6 +73,8 @@ func getLocalInfo(localBehind uint, localAhead uint) string {
     return "";
 }
 
+// Return the formatted prompt string for changed file information (modified,
+// deleted etc)
 func getChangeInfo(gitStatus GitStatus) string {
     var staged     string = showStaged(gitStatus);
     var unstaged   string = showUnstaged(gitStatus);
@@ -116,6 +90,7 @@ func getChangeInfo(gitStatus GitStatus) string {
     return staged + conflicted + unstaged + untracked;
 }
 
+// Return the formatted prompt string for conflicting files
 func showConflicted(gitStatus GitStatus) string {
     var conflicted string = "";
 
@@ -137,6 +112,7 @@ func showConflicted(gitStatus GitStatus) string {
     return " " + conflicted;
 }
 
+// Return the formatted prompt string for changed staged files
 func showStaged(gitStatus GitStatus) string {
     var staged string = "";
 
@@ -171,6 +147,7 @@ func showStaged(gitStatus GitStatus) string {
     return " " + staged;
 }
 
+// Return the formatted prompt string for changed unstaged files
 func showUnstaged(gitStatus GitStatus) string {
     var unstaged string = "";
 
@@ -192,6 +169,7 @@ func showUnstaged(gitStatus GitStatus) string {
     return " " + unstaged;
 }
 
+// Print out the whole prompt given some git Data
 func showPrompt(git GitData) string {
     remote := getRemoteInfo(git.remoteBehind, git.remoteAhead);
     branch := getBranchInfo(git.remoteBranch, git.localBranch);
@@ -207,4 +185,79 @@ func showPrompt(git GitData) string {
     change := getChangeInfo(git.status);
 
     return fmt.Sprintf(PROMPT_FORMAT, PREFIX, remote, branch, local, stash, change, SUFFIX);
+}
+
+// Easy to use and remember regex function
+func ezRegex(regex string, target string) bool {
+    ret, _    := regexp.MatchString(regex, target);
+    return ret;
+}
+
+// Function to parse the raw git status lines into usable information in a
+// GitStatus structure
+func parseGitStatus(lines []string) GitStatus {
+    ret := GitStatus{};
+
+    for _, line := range lines {
+        // STAGED
+        if (ezRegex("^M[^M] ", line)) {
+            ret.stagedModified += 1;
+        }
+
+        if (ezRegex("^A[^A] ", line)) {
+            ret.stagedAdded += 1;
+        }
+
+        if (ezRegex("^D[^D] ", line)) {
+            ret.stagedDeleted += 1;
+        }
+
+        if (ezRegex("^R[^R] ", line)) {
+            ret.stagedRenamed += 1;
+        }
+
+        if (ezRegex("^C[^C] ", line)) {
+            ret.stagedCopied += 1;
+        }
+
+        if (ezRegex("^T[^T] ", line)) {
+            ret.stagedTypeChanged += 1;
+        }
+
+        // UNSTAGED
+
+        if (ezRegex("^[^M]M ", line)) {
+            ret.unstagedModified += 1;
+        }
+
+        if (ezRegex("^[^D]D ", line)) {
+            ret.unstagedDeleted += 1;
+        }
+
+        if (ezRegex("^[^T]T ", line)) {
+            ret.unstagedTypeChanged += 1;
+        }
+
+        // CONFLICT
+
+        if (ezRegex("^[^U]U ", line)) {
+            ret.conflictUs += 1;
+        }
+
+        if (ezRegex("^U[^U] ", line)) {
+            ret.conflictThem += 1;
+        }
+
+        if (ezRegex("(UU|AA|DD)", line)) {
+            ret.conflictBoth += 1;
+        }
+
+        // UNTRACKED
+
+        if (ezRegex("^\\?\\? ", line)) {
+            ret.untracked += 1;
+        }
+    }
+
+    return ret;
 }

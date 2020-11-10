@@ -13,7 +13,7 @@ import (
 func getGitData() GitData {
     // Get the location of the .git folder
     var dotGit string = dotGit();
-    var isRepo bool   = dotGit != "";
+    var isRepo bool   = isRepo(dotGit);
 
     // If we aren't in a repo, then don't bother continuing. Just set that this
     // isn't a repo
@@ -44,6 +44,22 @@ func getGitData() GitData {
         status:       getGitStatus(),
         stash:        gitStash(),
     };
+}
+
+func isRepo(dotGit string) bool {
+    // If no dot git path, or we are in the .git folder, then return false
+    if (dotGit == "" || dotGit == ".") {
+        return false;
+    }
+
+    cwd, err := runCmd("pwd");
+    if (err != nil) {
+        panic("Failed to retrieve the current working directory.");
+    }
+
+
+    // consider this not a repo if we are inside of a .git folder
+    return !strings.HasPrefix(cwd, dotGit + "/");
 }
 
 // Returns the path to the .git folder for the CWD

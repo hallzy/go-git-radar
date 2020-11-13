@@ -20,3 +20,20 @@ Build the program with:
 ```bash
 $ make
 ```
+
+or
+
+```bash
+$ make build
+```
+
+## Testing
+
+You can run the automated tests with:
+
+```bash
+$ make test
+```
+
+Every bug fix and added feature should be accompanied with tests that test the
+change and all tests should pass before pushing.

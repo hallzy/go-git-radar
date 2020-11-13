@@ -9,3 +9,6 @@ symlinks:
 
 src/config.go:
 	$(error "You are missing your comfig file. Please copy config.go.example to src/config.go and make any config changes you want.")
+
+clean:
+	rm git-radar

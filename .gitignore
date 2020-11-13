@@ -2,4 +2,6 @@
 *.swo
 
 /src/config.go
-/scratch
+
+/.scratch/*
+!/.scratch/Makefile

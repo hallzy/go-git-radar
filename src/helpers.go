@@ -200,41 +200,41 @@ func parseGitStatus(lines []string) GitStatus {
 
     for _, line := range lines {
         // STAGED
-        if (ezRegex("^M[^M] ", line)) {
+        if (ezRegex("^M. ", line)) {
             ret.stagedModified += 1;
         }
 
-        if (ezRegex("^A[^A] ", line)) {
+        if (ezRegex("^A. ", line)) {
             ret.stagedAdded += 1;
         }
 
-        if (ezRegex("^D[^D] ", line)) {
+        if (ezRegex("^D. ", line)) {
             ret.stagedDeleted += 1;
         }
 
-        if (ezRegex("^R[^R] ", line)) {
+        if (ezRegex("^R. ", line)) {
             ret.stagedRenamed += 1;
         }
 
-        if (ezRegex("^C[^C] ", line)) {
+        if (ezRegex("^C. ", line)) {
             ret.stagedCopied += 1;
         }
 
-        if (ezRegex("^T[^T] ", line)) {
+        if (ezRegex("^T. ", line)) {
             ret.stagedTypeChanged += 1;
         }
 
         // UNSTAGED
 
-        if (ezRegex("^[^M]M ", line)) {
+        if (ezRegex("^.M ", line)) {
             ret.unstagedModified += 1;
         }
 
-        if (ezRegex("^[^D]D ", line)) {
+        if (ezRegex("^.D ", line)) {
             ret.unstagedDeleted += 1;
         }
 
-        if (ezRegex("^[^T]T ", line)) {
+        if (ezRegex("^.T ", line)) {
             ret.unstagedTypeChanged += 1;
         }
 

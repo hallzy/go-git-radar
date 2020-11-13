@@ -1,4 +1,5 @@
 *.swp
 *.swo
 
-config.go
+/src/config.go
+/scratch

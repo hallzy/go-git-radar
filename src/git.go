@@ -74,7 +74,7 @@ func dotGit() string {
 
 // Runs git fetch if enough time has passed
 func fetch(dotGit string) bool {
-    var now                uint = now();
+    var now uint = now();
 
     // How long has it been since the last fetch was made?
     var secSinceLastFetch  uint = now - getLastFetchTime(dotGit);
@@ -241,7 +241,7 @@ func gitStash() uint {
         return 0;
     }
 
-    return uint(strings.Count(out, "\n"));
+    return countLines(out);
 }
 
 // Read the fetch time file to see when the last fetch was run

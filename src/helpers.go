@@ -261,3 +261,8 @@ func parseGitStatus(lines []string) GitStatus {
 
     return ret;
 }
+
+// Count the number of lines in a string
+func countLines(str string) uint {
+    return uint(strings.Count(str, "\n"));
+}

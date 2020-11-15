@@ -178,7 +178,8 @@ func getParentRemote() RemoteBranch {
         return defaultRemote;
     }
 
-    remoteBranch := strings.Split(out2, "/");
+    // Split into 2 strings only, as the branch could have slashes in its name
+    remoteBranch := strings.SplitN(out2, "/", 2);
 
     return RemoteBranch{
         remote: remoteBranch[0],

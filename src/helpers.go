@@ -28,32 +28,54 @@ func trim(str string) string {
     return strings.TrimSpace(string(str));
 }
 
+func getFullRemote(remoteBranch RemoteBranch) string {
+    if (remoteBranch.remote == "" && remoteBranch.branch == "") {
+        return "";
+    }
+
+    return remoteBranch.remote + "/" + remoteBranch.branch;
+}
+
+func getFullName(remoteBranch RemoteBranch) string {
+    if (remoteBranch.remote == "" && remoteBranch.branch == "") {
+        return "";
+    }
+
+    if (remoteBranch.remote == "origin") {
+        return remoteBranch.branch;
+    }
+
+    return remoteBranch.remote + "/" + remoteBranch.branch;
+}
+
 // Given how many commits behind or ahead, return the formatted string used in
 // the prompt for remote info
-func getRemoteInfo(remoteBehind uint, remoteAhead uint) string {
+func getRemoteInfo(branches Branches, remoteBehind uint, remoteAhead uint) string {
+    var parent string = getFullName(branches.parent);
+    var remote string = getFullName(branches.remote);
+
+    // If no remote, report the local branch as no upstream
+    if (remote == "") {
+        return fmt.Sprintf(REMOTE_NOT_UPSTREAM, branches.local);
+    }
+
     if (remoteBehind > 0 && remoteAhead > 0) {
-        return fmt.Sprintf(REMOTE_DIVERGED, remoteBehind, remoteAhead);
+        return fmt.Sprintf(REMOTE_DIVERGED, parent, remoteBehind, remoteAhead, remote);
     }
 
     if (remoteAhead > 0) {
-        return fmt.Sprintf(REMOTE_AHEAD, remoteAhead);
+        return fmt.Sprintf(REMOTE_AHEAD, parent, remoteAhead, remote);
     }
 
     if (remoteBehind > 0) {
-        return fmt.Sprintf(REMOTE_BEHIND, remoteBehind);
+        return fmt.Sprintf(REMOTE_BEHIND, parent, remoteBehind, remote);
     }
 
-    return "";
-}
-
-// Return the formatted prompt string for branch information
-func getBranchInfo(remoteBranch string, localBranch string) string {
-    if (remoteBranch == "") {
-        // If no remote, report the local branch as no upstream
-        return fmt.Sprintf(REMOTE_NOT_UPSTREAM, localBranch);
+    if (remote != parent) {
+        return fmt.Sprintf(REMOTE_EQUAL, parent, remote);
     }
 
-    return fmt.Sprintf(BRANCH_FORMAT, localBranch);
+    return fmt.Sprintf(REMOTE_SAME, remote);
 }
 
 // Return the formatted prompt string for local info
@@ -171,8 +193,7 @@ func showUnstaged(gitStatus GitStatus) string {
 
 // Print out the whole prompt given some git Data
 func showPrompt(git GitData) string {
-    remote := getRemoteInfo(git.remoteBehind, git.remoteAhead);
-    branch := getBranchInfo(git.remoteBranch, git.localBranch);
+    remote := getRemoteInfo(git.branches, git.remoteBehind, git.remoteAhead);
     local  := getLocalInfo(git.localBehind, git.localAhead);
 
     var stash string;
@@ -184,7 +205,7 @@ func showPrompt(git GitData) string {
 
     change := getChangeInfo(git.status);
 
-    return fmt.Sprintf(PROMPT_FORMAT, PREFIX, remote, branch, local, stash, change, SUFFIX);
+    return fmt.Sprintf(PROMPT_FORMAT, PREFIX, remote, local, stash, change, SUFFIX);
 }
 
 // Easy to use and remember regex function

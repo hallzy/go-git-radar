@@ -266,3 +266,20 @@ func parseGitStatus(lines []string) GitStatus {
 func countLines(str string) uint {
     return uint(strings.Count(str, "\n"));
 }
+
+// Run this function on a created GitData struct to set some defaults
+func newGitData(git GitData) GitData {
+    if (git.branches.local == "") {
+        git.branches.local = "<unset>";
+    }
+
+    if (git.branches.parent.remote == "") {
+        git.branches.parent.remote = "origin";
+    }
+
+    if (git.branches.parent.branch == "") {
+        git.branches.parent.branch = "master";
+    }
+
+    return git;
+}

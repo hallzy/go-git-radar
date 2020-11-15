@@ -16,12 +16,14 @@ func main() {
                 help();
                 return;
             default:
-                panic("Error: [" + command + "] is an unknown option to git-radar");
+                fmt.Println("Error: [" + command + "] is an unknown option to git-radar\n");
+                help();
+                return;
         }
     }
 
     // Get important git information about this current repo we are in
-    Git := getGitData();
+    Git := newGitData(getGitData());
 
     // if not a repo, then nothing to do. Exit silently
     if (!Git.isRepo) {

@@ -28,19 +28,24 @@ func getGitData() GitData {
 
     // Save these in variables as they are needed for function calls below
     var localBranch  string = getLocalBranchName();
-    var remoteBranch string = getRemoteBranchName(localBranch);
-    var parentBranch string = getParentRemote();
+    var remoteBranch RemoteBranch = getRemoteBranchName(localBranch);
+    var parentBranch RemoteBranch = getParentRemote();
+
+    var parentFull = getFullRemote(parentBranch);
+    var remoteFull = getFullRemote(remoteBranch);
 
     return GitData {
         isRepo:       isRepo,
         dotGit:       dotGit,
-        localBranch:  localBranch,
-        remoteBranch: remoteBranch,
-        parentBranch: parentBranch,
-        remoteAhead:  howFarAheadRemote(remoteBranch, parentBranch),
-        remoteBehind: howFarBehindRemote(remoteBranch, parentBranch),
-        localAhead:   howFarAheadLocal(remoteBranch),
-        localBehind:  howFarBehindLocal(remoteBranch),
+        branches:     Branches{
+            local:  localBranch,
+            remote: remoteBranch,
+            parent: parentBranch,
+        },
+        remoteAhead:  howFarAheadRemote(remoteFull, parentFull),
+        remoteBehind: howFarBehindRemote(remoteFull, parentFull),
+        localAhead:   howFarAheadLocal(remoteFull),
+        localBehind:  howFarBehindLocal(remoteFull),
         status:       getGitStatus(),
         stash:        gitStash(),
     };
@@ -96,7 +101,7 @@ func fetch(dotGit string) bool {
 func getLocalBranchName() string {
     // If no errors, then local branch is the result of the below command
     out1, err := runCmd("git symbolic-ref --short HEAD");
-    if (err == nil) {
+    if (err == nil && out1 != "") {
         return out1;
     }
 
@@ -112,42 +117,49 @@ func getLocalBranchName() string {
 }
 
 // Get the name of the remote tracking branch
-func getRemoteBranchName(localBranch string) string {
+func getRemoteBranchName(localBranch string) RemoteBranch {
+    var ret RemoteBranch;
     // For the input branch, find out what the remote name is for it (probably
     // origin)
     remote, err := runCmd("git config --get branch." + localBranch + ".remote");
     if (err != nil) {
-        return "";
+        return ret;
     }
 
     // If no remote, then assume no remote branch tracking
     if (remote == "") {
-        return "";
+        return ret;
     }
 
     // Get the branch name that the local branch tracks at the remote we found
     // above
     out, err := runCmd("git config --get branch." + localBranch + ".merge");
     if (err != nil) {
-        return "";
+        return ret;
     }
 
     // The above will prefix the branch with 'refs/heads/'. We don't care about
     // that, so remove it
     var remoteMergeBranch string = strings.Replace(out, "refs/heads/", "", -1);
     if (remoteMergeBranch == "") {
-        return "";
+        return ret;
     }
 
     // Return the remote and branch name together
-    return remote + "/" + remoteMergeBranch;
+    ret.remote = remote;
+    ret.branch = remoteMergeBranch;
+
+    return ret;
 }
 
 // Get the remote branch that the current branch is based on
-func getParentRemote() string {
+func getParentRemote() RemoteBranch {
     // Every branch is based on something, so if we can't find what that is,
     // assume we are basing it off of origin master
-    var defaultRemote string = "origin/master";
+    defaultRemote := RemoteBranch{
+        remote: "origin",
+        branch: "master",
+    }
 
     // Get the name of the currently checked out branch
     out1, err := runCmd("git rev-parse --abbrev-ref HEAD");
@@ -166,7 +178,12 @@ func getParentRemote() string {
         return defaultRemote;
     }
 
-    return out2;
+    remoteBranch := strings.Split(out2, "/");
+
+    return RemoteBranch{
+        remote: remoteBranch[0],
+        branch: remoteBranch[1],
+    };
 }
 
 // Common function for checking how far ahead/behind remote/local is.

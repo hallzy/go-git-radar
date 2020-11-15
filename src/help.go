@@ -2,93 +2,246 @@ package main
 
 import (
     "fmt"
+    "regexp"
+    "strings"
+    "unicode/utf8"
 )
+
+// Remove colour codes from string
+func clean(str string) string {
+    reg1, err := regexp.Compile("\x01\033\\[[^m]+");
+    if (err != nil) {
+        panic("Failed to clean colour codes from string.");
+    }
+
+    reg2, err := regexp.Compile("m\x02");
+    if (err != nil) {
+        panic("Failed to clean colour codes from string.");
+    }
+
+    str1 := reg1.ReplaceAllString(str, "");
+    return reg2.ReplaceAllString(str1, "");
+}
+
+// Find the length of the string (this works for strings with multibyte
+// characters)
+func strlen(str string) uint {
+    return uint(utf8.RuneCountInString(clean(str)));
+}
+
+// Add lengths to a list of Examples
+func insertLengths(examples []Example) []Example {
+    for idx, example := range examples {
+        examples[idx].length = strlen(example.prompt);
+    }
+
+    return examples;
+}
+
+// Find the max length example
+func maxLength(examples []Example) uint {
+    var max uint = 0;
+
+    for _, example := range examples {
+        if (example.length > max) {
+            max = example.length;
+        }
+    }
+
+    return max;
+}
+
+type Example struct {
+    prompt      string;
+    description string;
+    length      uint;
+}
+
 
 // This function prints out the help for this tool
 func help() {
-    prompts := []string {
-        showPrompt(GitData{
-            remoteBranch: "origin/master",
-            localBranch: "master",
-        }),
-        showPrompt(GitData{
-            localBranch: "my-branch",
-        }),
-        showPrompt(GitData{
-            remoteBranch: "origin/my-branch",
-            localBranch: "my-branch",
-            status: GitStatus{
-                untracked: 2,
-            },
-        }),
-        showPrompt(GitData{
-            remoteBranch: "origin/my-branch",
-            localBranch: "my-branch",
-            status: GitStatus{
-                stagedAdded:      1,
-                unstagedModified: 3,
-            },
-        }),
-        showPrompt(GitData{
-            remoteBranch: "origin/my-branch",
-            localBranch: "my-branch",
-            remoteBehind: 2,
-            localAhead: 3,
-        }),
-        showPrompt(GitData{
-            remoteBranch: "origin/my-branch",
-            localBranch: "my-branch",
-            remoteBehind: 2,
-            remoteAhead: 3,
-        }),
-        showPrompt(GitData{
-            localBranch: "detached@94eac67",
-            status: GitStatus{
-                conflictThem: 2,
-                conflictUs:   3,
-            },
-        }),
-        showPrompt(GitData{
-            remoteBranch: "origin/my-branch",
-            localBranch: "my-branch",
-            remoteBehind: 2,
-            remoteAhead: 3,
-            localBehind: 3,
-            localAhead: 5,
-        }),
-        showPrompt(GitData{
-            remoteBranch: "origin/my-branch",
-            localBranch: "my-branch",
-            remoteAhead: 3,
-        }),
-        showPrompt(GitData{
-            remoteBranch: "origin/my-branch",
-            localBranch: "my-branch",
-            stash: 3,
-        }),
+    examples := []Example {
+        {
+            description: "Newly created repository. No remote branches.",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    local: "master",
+                },
+            })),
+        },
+        {
+            description: "You are in your master branch and are tracking origin master",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "master",
+                    },
+                    local: "master",
+                },
+            })),
+        },
+        {
+            description: "Created a new branch, but it isn't tracking any remote branches yet.",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    local: "my-branch",
+                },
+            })),
+        },
+        {
+            description: "2 New files that aren't being tracked yet. Branch is tracking origin/my-branch and parent is origin/master",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "my-branch",
+                    },
+                    local: "my-branch",
+                },
+                status: GitStatus{
+                    untracked: 2,
+                },
+            })),
+        },
+        {
+            description: "Same as previous, but now the parent is upstream/dev",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "my-branch",
+                    },
+                    parent: RemoteBranch{
+                        remote: "upstream",
+                        branch: "dev",
+                    },
+                    local: "my-branch",
+                },
+                status: GitStatus{
+                    untracked: 2,
+                },
+            })),
+        },
+        {
+            description: "1 new file staged to commit and 3 modifications that we still need to `git add`",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "my-branch",
+                    },
+                    local: "my-branch",
+                },
+                status: GitStatus{
+                    stagedAdded:      1,
+                    unstagedModified: 3,
+                },
+            })),
+        },
+        {
+            description: "3 Commits waiting to be pushed to remote, origin/my-branch is behind origin/master by 2 commits.",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "my-branch",
+                    },
+                    local: "my-branch",
+                },
+                remoteBehind: 2,
+                localAhead: 3,
+            })),
+        },
+        {
+            description: "our commits pushed up, my-branch and its parent have diverged",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "my-branch",
+                    },
+                    local: "my-branch",
+                },
+                remoteBehind: 2,
+                remoteAhead: 3,
+            })),
+        },
+        {
+            description: "mid rebase, we are detached and have 3 conflicts caused by US and 2 caused by THEM",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    local: "detached@94eac67",
+                },
+                status: GitStatus{
+                    conflictThem: 2,
+                    conflictUs:   3,
+                },
+            })),
+        },
+        {
+            description: "rebase complete, our rewritten commits now need pushed up",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "my-branch",
+                    },
+                    local: "my-branch",
+                },
+                remoteBehind: 2,
+                remoteAhead: 3,
+                localBehind: 3,
+                localAhead: 5,
+            })),
+        },
+        {
+            description: "origin/my-branch is 3 commits ahead of it's parent branch",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "my-branch",
+                    },
+                    local: "my-branch",
+                },
+                remoteAhead: 3,
+            })),
+        },
+        {
+            description: "You have 3 stashes stored",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "my-branch",
+                    },
+                    local: "my-branch",
+                },
+                stash: 3,
+            })),
+        },
     };
+
+    examplesWithLengths := insertLengths(examples);
+    maxLength := maxLength(examplesWithLengths);
 
     fmt.Println("git-radar - a heads up display for git");
     fmt.Println("");
     fmt.Println("examples:");
 
-    fmt.Println(prompts[0], "\t\t\t\t# You are on the master branch and everything is clean");
-    fmt.Println(prompts[1], "\t\t\t# Fresh branch that we haven't pushed upstream");
-    fmt.Println(prompts[2], "\t\t\t\t# Two files created that aren't tracked by git");
-    fmt.Println(prompts[3], "\t\t\t# 1 new file staged to commit and 3 modifications that we still need to `git add`");
-    fmt.Println(prompts[4], "\t\t\t# 3 commits made locally ready to push up while master is ahead of us by 2");
-    fmt.Println(prompts[5], "\t\t\t# our commits pushed up, master and my-branch have diverged");
-    fmt.Println(prompts[6], "\t# mid rebase, we are detached and have 3 conflicts caused by US and 2 caused by THEM");
-    fmt.Println(prompts[7], "\t\t\t# rebase complete, our rewritten commits now need pushed up");
-    fmt.Println(prompts[8], "\t\t\t# origin/my-branch is up to date with master and has our 3 commits waiting merge");
-    fmt.Println(prompts[9], "\t\t\t\t# You have 3 stashes stored");
+    var padding uint;
+    for _, example := range examplesWithLengths {
+        padding = maxLength - example.length + 2;
+        fmt.Println(example.prompt + strings.Repeat(" ", int(padding)) + "# " + example.description);
+    }
 
     fmt.Println("");
     fmt.Println("usage:");
-    fmt.Println("  git-radar [bash] [fetch]");
+    fmt.Println("  git-radar [help|fetch]");
     fmt.Println("");
     fmt.Println("  fetch  # Fetches your repo asynchronously in the background every 5 mins");
-    fmt.Println("  bash   # Output prompt using Bash style color characters");
+    fmt.Println("  help   # Output this help text.");
     fmt.Println("");
     fmt.Println("Bash example:");
     fmt.Println("  export PS1=\"\\W\\$(git-radar bash fetch) \"");

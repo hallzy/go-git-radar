@@ -35,5 +35,5 @@ func main() {
     }
 
     // Print out the prompt with the given Git data
-    fmt.Print(showPrompt(Git) + "\n");
+    fmt.Print(showPrompt(Git));
 }

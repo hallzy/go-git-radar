@@ -4,7 +4,7 @@ package main
 var GIT_RADAR_FETCH_TIME uint = 5 * 60;
 
 // Pad the git-radar prompt with these
-var PREFIX string = "  ";
+var PREFIX string = "";
 var SUFFIX string = " ";
 
 

@@ -259,7 +259,7 @@ func gitStash() uint {
         return 0;
     }
 
-    return countLines(out);
+    return countNewLines(out);
 }
 
 // Read the fetch time file to see when the last fetch was run

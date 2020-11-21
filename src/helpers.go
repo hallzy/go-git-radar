@@ -225,11 +225,13 @@ func parseGitStatus(lines []string) GitStatus {
             ret.stagedModified += 1;
         }
 
-        if (ezRegex("^A. ", line)) {
+        // AA is for conflicts, so can't have 2 A's
+        if (ezRegex("^A[^A] ", line)) {
             ret.stagedAdded += 1;
         }
 
-        if (ezRegex("^D. ", line)) {
+        // DD is for conflicts, so can't have 2 D's
+        if (ezRegex("^D[^D] ", line)) {
             ret.stagedDeleted += 1;
         }
 
@@ -251,7 +253,8 @@ func parseGitStatus(lines []string) GitStatus {
             ret.unstagedModified += 1;
         }
 
-        if (ezRegex("^.D ", line)) {
+        // DD is for conflicts, so can't have 2 D's
+        if (ezRegex("^[^D]D ", line)) {
             ret.unstagedDeleted += 1;
         }
 
@@ -269,7 +272,7 @@ func parseGitStatus(lines []string) GitStatus {
             ret.conflictThem += 1;
         }
 
-        if (ezRegex("(UU|AA|DD)", line)) {
+        if (ezRegex("^(UU|AA|DD)", line)) {
             ret.conflictBoth += 1;
         }
 
@@ -284,7 +287,7 @@ func parseGitStatus(lines []string) GitStatus {
 }
 
 // Count the number of lines in a string
-func countLines(str string) uint {
+func countNewLines(str string) uint {
     return uint(strings.Count(str, "\n"));
 }
 

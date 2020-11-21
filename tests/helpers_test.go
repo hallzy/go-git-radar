@@ -84,8 +84,7 @@ func TestTrim(T *testing.T) {
 }
 
 func TestParseGitStatus(T *testing.T) {
-    // A case where 2 files have both staged and unstaged changes, while one
-    // file just has unstaged changes
+    // 2 files have staged and unstaged changes, one file has unstaged changes {{{
     filesWithStagedAndUnstagedChanges := func() {
         got := parseGitStatus([]string {
             "MM file1",
@@ -102,6 +101,81 @@ func TestParseGitStatus(T *testing.T) {
             T.Errorf("parseGitStatus(): Partially staged file test failed. Got [%+v], expected [%+v]", got, expected);
         }
     }
+    // }}}
+    // Combination of every status type {{{
+    combinationOfAll := func() {
+        input := []string {
+            "M   staged modified 1",
+            " D  unstaged deleted 1",
+            "xD  unstaged deleted 2",
+            " T  unstaged type change 1",
+            "DD  conflict both 4",
+            "UU  conflict both 1",
+            "A   staged new file 1",
+            "R   staged renamed 2",
+            "Dx  staged deleted 2",
+            " M  unstaged modified 2",
+            "D   staged deleted 1",
+            "Mx  staged modified 2",
+            "C   staged copied 1",
+            "??  untracked 3",
+            " M  unstaged modified 1",
+            "DD  conflict both 5",
+            "U   conflict them 1",
+            "R   staged renamed 1",
+            " U  conflict us 1",
+            "UU  conflict both 2",
+            "R   staged renamed 3",
+            "T   staged type change 1",
+            "xM  unstaged modified 3",
+            " M  unstaged modified 4",
+            "AA  conflict both 3",
+            "??  untracked 1",
+            "??  untracked 2",
+        };
 
+        expected := GitStatus{
+            stagedModified: 2,
+            stagedAdded: 1,
+            stagedDeleted: 2,
+            stagedRenamed: 3,
+            stagedCopied: 1,
+            stagedTypeChanged: 1,
+
+            unstagedModified: 4,
+            unstagedDeleted: 2,
+            unstagedTypeChanged: 1,
+
+            conflictUs: 1,
+            conflictThem: 1,
+            conflictBoth: 5,
+
+            untracked: 3,
+        };
+
+        got := parseGitStatus(input);
+
+        if (!reflect.DeepEqual(got, expected)) {
+            T.Errorf("parseGitStatus(): Combination of all types. Got [%+v], expected [%+v]", got, expected);
+        }
+    }
+    // }}}
     filesWithStagedAndUnstagedChanges();
+    combinationOfAll();
+}
+
+func TestCountLines(T *testing.T) {
+    inputExpected := map[string]uint {
+        "":                   0,
+        "\n\n":               2,
+        "Testing\n\nTesting": 2,
+        "\r\n\r\n\r\n":       3,
+    }
+
+    for input, expected := range inputExpected {
+        output := countNewLines(input);
+        if (output != expected) {
+            T.Errorf("countNewLines(): count newlines test failed. Got [%d], expected [%d] for input [%s]", output, expected, input);
+        }
+    }
 }

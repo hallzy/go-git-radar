@@ -1,7 +1,6 @@
 package main
 
 import (
-    "fmt"
     "regexp"
     "strings"
     "unicode/utf8"
@@ -59,7 +58,7 @@ type Example struct {
 
 
 // This function prints out the help for this tool
-func help() {
+func help() string {
     examples := []Example {
         {
             description: "Newly created repository. No remote branches.",
@@ -226,28 +225,32 @@ func help() {
     examplesWithLengths := insertLengths(examples);
     maxLength := maxLength(examplesWithLengths);
 
-    fmt.Println("git-radar - a heads up display for git");
-    fmt.Println("");
-    fmt.Println("examples:");
+    var ret string = "";
+    ret += "git-radar - a heads up display for git\n";
+    ret += "\n";
+    ret += "examples:\n";
 
     var padding uint;
     for _, example := range examplesWithLengths {
         padding = maxLength - example.length + 2;
-        fmt.Println(example.prompt + strings.Repeat(" ", int(padding)) + "# " + example.description);
+        ret += example.prompt + strings.Repeat(" ", int(padding)) + "# " + example.description;
+        ret += "\n";
     }
 
-    fmt.Println("");
-    fmt.Println("usage:");
-    fmt.Println("  git-radar [help|fetch]");
-    fmt.Println("");
-    fmt.Println("  fetch  # Fetches your repo asynchronously in the background every 5 mins");
-    fmt.Println("  help   # Output this help text.");
-    fmt.Println("");
-    fmt.Println("Bash example:");
-    fmt.Println("  export PS1=\"\\W\\$(git-radar bash fetch) \"");
-    fmt.Println("");
-    fmt.Println("  This will show your current directory and the full git-radar.");
-    fmt.Println("  As an added benefit, if you are in a repo, it will asynchronously");
-    fmt.Println("  run `git fetch` every 5 mins, so that you are never out of date.");
-    fmt.Println("");
+    ret += "\n";
+    ret += "usage:\n";
+    ret += "  git-radar [help|fetch]\n";
+    ret += "\n";
+    ret += "  fetch  # Fetches your repo asynchronously in the background every 5 mins\n";
+    ret += "  help   # Output this help text.\n";
+    ret += "\n";
+    ret += "Bash example:\n";
+    ret += "  export PS1=\"\\W\\$(git-radar bash fetch) \"\n";
+    ret += "\n";
+    ret += "  This will show your current directory and the full git-radar.\n";
+    ret += "  As an added benefit, if you are in a repo, it will asynchronously\n";
+    ret += "  run `git fetch` every 5 mins, so that you are never out of date.\n";
+    ret += "\n";
+
+    return ret;
 }

@@ -13,7 +13,7 @@ func main() {
             case "fetch":
                 isFetch = true;
             case "help":
-                help();
+                fmt.Print(help());
                 return;
             default:
                 fmt.Println("Error: [" + command + "] is an unknown option to git-radar\n");

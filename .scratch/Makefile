@@ -1,6 +1,6 @@
 test:
 	@echo ''
 	@echo ''
-	go test -v -cover
+	go test -v -coverprofile=coverage.tmp && go tool cover -html=coverage.tmp
 	@echo ''
 	@echo ''

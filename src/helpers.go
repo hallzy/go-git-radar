@@ -29,7 +29,7 @@ func trim(str string) string {
 }
 
 func getFullRemote(remoteBranch RemoteBranch) string {
-    if (remoteBranch.remote == "" && remoteBranch.branch == "") {
+    if (remoteBranch.remote == "" || remoteBranch.branch == "") {
         return "";
     }
 
@@ -37,7 +37,7 @@ func getFullRemote(remoteBranch RemoteBranch) string {
 }
 
 func getFullName(remoteBranch RemoteBranch) string {
-    if (remoteBranch.remote == "" && remoteBranch.branch == "") {
+    if (remoteBranch.remote == "" || remoteBranch.branch == "") {
         return "";
     }
 
@@ -101,15 +101,18 @@ func getChangeInfo(gitStatus GitStatus) string {
     var staged     string = showStaged(gitStatus);
     var unstaged   string = showUnstaged(gitStatus);
     var conflicted string = showConflicted(gitStatus);
-    var untracked  string;
-
-
-    untracked = "";
-    if (gitStatus.untracked != 0) {
-        untracked = " " + fmt.Sprintf(CHANGES_UNTRACKED, gitStatus.untracked, "A");
-    }
+    var untracked  string = showUntracked(gitStatus);
 
     return staged + conflicted + unstaged + untracked;
+}
+
+// Return the formatted prompt string for local info
+func showUntracked(gitStatus GitStatus) string {
+    if (gitStatus.untracked == 0) {
+        return "";
+    }
+
+    return " " + fmt.Sprintf(CHANGES_UNTRACKED, gitStatus.untracked, "A");
 }
 
 // Return the formatted prompt string for conflicting files

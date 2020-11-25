@@ -8,7 +8,7 @@ import(
 // Test clean(){{{
 func TestClean(T *testing.T) {
     inputExpected := map[string]string {
-        "This is a test": "This is a test",
+        "This is a test":                                  "This is a test",
         "\x01\033[1;31m\x02This\x01\033[0m\x02 is a test": "This is a test",
     }
 
@@ -23,7 +23,7 @@ func TestClean(T *testing.T) {
 // Test strlen(){{{
 func TestStrlen(T *testing.T) {
     inputExpected := map[string]uint {
-        "This is a test": 14,
+        "This is a test":    14,
         "git:(⚡my-branch)": 16,
     }
 
@@ -43,8 +43,8 @@ func TestInsertLengths(T *testing.T) {
         Example{ prompt: "\x01\033[1;31m\x02This\x01\033[0m\x02 is a test" },
     };
     expected := []Example{
-        Example{ prompt: "this is a test prompt", length: 21 },
-        Example{ prompt: "git:(⚡my-branch)", length: 16 },
+        Example{ prompt: "this is a test prompt",                           length: 21 },
+        Example{ prompt: "git:(⚡my-branch)",                               length: 16 },
         Example{ prompt: "\x01\033[1;31m\x02This\x01\033[0m\x02 is a test", length: 14 },
     };
 
@@ -57,8 +57,8 @@ func TestInsertLengths(T *testing.T) {
 // Test maxLength(){{{
 func TestMaxLength(T *testing.T) {
     input := []Example{
-        Example{ prompt: "this is a test prompt", length: 21 },
-        Example{ prompt: "git:(⚡my-branch)", length: 16 },
+        Example{ prompt: "this is a test prompt",                           length: 21 },
+        Example{ prompt: "git:(⚡my-branch)",                               length: 16 },
         Example{ prompt: "\x01\033[1;31m\x02This\x01\033[0m\x02 is a test", length: 14 },
     };
 

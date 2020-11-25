@@ -149,7 +149,7 @@ func help() string {
                     local: "my-branch",
                 },
                 remoteBehind: 2,
-                localAhead: 3,
+                localAhead:   3,
             })),
         },
         {
@@ -163,7 +163,7 @@ func help() string {
                     local: "my-branch",
                 },
                 remoteBehind: 2,
-                remoteAhead: 3,
+                remoteAhead:  3,
             })),
         },
         {
@@ -189,9 +189,9 @@ func help() string {
                     local: "my-branch",
                 },
                 remoteBehind: 2,
-                remoteAhead: 3,
-                localBehind: 3,
-                localAhead: 5,
+                remoteAhead:  3,
+                localBehind:  3,
+                localAhead:   5,
             })),
         },
         {
@@ -232,9 +232,9 @@ func help() string {
 
     var padding uint;
     for _, example := range examplesWithLengths {
-        padding = maxLength - example.length + 2;
-        ret += example.prompt + strings.Repeat(" ", int(padding)) + "# " + example.description;
-        ret += "\n";
+        padding  = maxLength - example.length + 2;
+        ret     += example.prompt + strings.Repeat(" ", int(padding)) + "# " + example.description;
+        ret     += "\n";
     }
 
     ret += "\n";

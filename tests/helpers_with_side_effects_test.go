@@ -41,8 +41,9 @@ func TestFileExists(T *testing.T) {
     for input, expected := range inputExpected {
         output := fileExists(input);
         if (output != expected) {
-            skipCases["TestFileRead"] = "TestFileRead(): Skipped because TestFileExists() failed.";
+            skipCases["TestFileRead"]  = "TestFileRead(): Skipped because TestFileExists() failed.";
             skipCases["TestFileWrite"] = "TestFileWrite(): Skipped because TestFileExists() failed.";
+
             T.Errorf("clean(): Got [%t], expected [%t] for input [%s]", output, expected, input);
         }
     }

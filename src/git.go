@@ -27,7 +27,7 @@ func getGitData() GitData {
     // This is a repo, so set everything else
 
     // Save these in variables as they are needed for function calls below
-    var localBranch  string = getLocalBranchName();
+    var localBranch  string       = getLocalBranchName();
     var remoteBranch RemoteBranch = getRemoteBranchName(localBranch);
     var parentBranch RemoteBranch = getParentRemote();
 
@@ -35,9 +35,9 @@ func getGitData() GitData {
     var remoteFull = getFullRemote(remoteBranch);
 
     return GitData {
-        isRepo:       isRepo,
-        dotGit:       dotGit,
-        branches:     Branches{
+        isRepo:     isRepo,
+        dotGit:     dotGit,
+        branches:   Branches{
             local:  localBranch,
             remote: remoteBranch,
             parent: parentBranch,

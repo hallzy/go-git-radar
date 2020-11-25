@@ -140,18 +140,18 @@ func TestParseGitStatus(T *testing.T) {
         };
 
         expected := GitStatus{
-            stagedModified: 2,
-            stagedAdded: 1,
-            stagedDeleted: 2,
-            stagedRenamed: 3,
-            stagedCopied: 1,
+            stagedModified:    2,
+            stagedAdded:       1,
+            stagedDeleted:     2,
+            stagedRenamed:     3,
+            stagedCopied:      1,
             stagedTypeChanged: 1,
 
-            unstagedModified: 4,
-            unstagedDeleted: 2,
+            unstagedModified:    4,
+            unstagedDeleted:     2,
             unstagedTypeChanged: 1,
 
-            conflictUs: 1,
+            conflictUs:   1,
             conflictThem: 1,
             conflictBoth: 5,
 
@@ -189,16 +189,16 @@ func TestCountLines(T *testing.T) {
 // Test getFullRemote{{{
 func TestGetFullRemote(T *testing.T) {
     inputExpected := map[RemoteBranch]string {
-        RemoteBranch{remote: "origin", branch: "master"}:                 "origin/master",
-        RemoteBranch{remote: "origin", branch: "anything"}:               "origin/anything",
-        RemoteBranch{remote: "origin", branch: "anything/something"}:     "origin/anything/something",
+        RemoteBranch{remote: "origin",     branch: "master"}:             "origin/master",
+        RemoteBranch{remote: "origin",     branch: "anything"}:           "origin/anything",
+        RemoteBranch{remote: "origin",     branch: "anything/something"}: "origin/anything/something",
         RemoteBranch{remote: "not-origin", branch: "master"}:             "not-origin/master",
         RemoteBranch{remote: "not-origin", branch: "anything"}:           "not-origin/anything",
         RemoteBranch{remote: "not-origin", branch: "anything/something"}: "not-origin/anything/something",
-        RemoteBranch{remote: "", branch: ""}:                             "",
-        RemoteBranch{remote: "origin", branch: ""}:                       "",
+        RemoteBranch{remote: "",           branch: ""}:                   "",
+        RemoteBranch{remote: "origin",     branch: ""}:                   "",
         RemoteBranch{remote: "not-origin", branch: ""}:                   "",
-        RemoteBranch{remote: "", branch: "somebranch"}:                   "",
+        RemoteBranch{remote: "",           branch: "somebranch"}:         "",
     }
 
     for input, expected := range inputExpected {
@@ -212,16 +212,16 @@ func TestGetFullRemote(T *testing.T) {
 // Test getFullName{{{
 func TestGetFullName(T *testing.T) {
     inputExpected := map[RemoteBranch]string {
-        RemoteBranch{remote: "origin", branch: "master"}:                 "master",
-        RemoteBranch{remote: "origin", branch: "anything"}:               "anything",
-        RemoteBranch{remote: "origin", branch: "anything/something"}:     "anything/something",
+        RemoteBranch{remote: "origin",     branch: "master"}:             "master",
+        RemoteBranch{remote: "origin",     branch: "anything"}:           "anything",
+        RemoteBranch{remote: "origin",     branch: "anything/something"}: "anything/something",
         RemoteBranch{remote: "not-origin", branch: "master"}:             "not-origin/master",
         RemoteBranch{remote: "not-origin", branch: "anything"}:           "not-origin/anything",
         RemoteBranch{remote: "not-origin", branch: "anything/something"}: "not-origin/anything/something",
-        RemoteBranch{remote: "", branch: ""}:                             "",
-        RemoteBranch{remote: "origin", branch: ""}:                       "",
+        RemoteBranch{remote: "",           branch: ""}:                   "",
+        RemoteBranch{remote: "origin",     branch: ""}:                   "",
         RemoteBranch{remote: "not-origin", branch: ""}:                   "",
-        RemoteBranch{remote: "", branch: "somebranch"}:                   "",
+        RemoteBranch{remote: "",           branch: "somebranch"}:         "",
     }
 
     for input, expected := range inputExpected {
@@ -263,7 +263,7 @@ func TestGetRemoteInfo(T *testing.T) {
         TestRemoteInfoType{
             remoteBehind: 1, remoteAhead: 0, branches: Branches {
                 local: "",
-                remote: RemoteBranch{remote: "origin", branch: "branch"},
+                remote: RemoteBranch{remote: "origin",   branch: "branch"},
                 parent: RemoteBranch{remote: "upstream", branch: "master"},
             },
         } : fmt.Sprintf(REMOTE_BEHIND, "upstream/master", 1, "branch"),
@@ -272,7 +272,7 @@ func TestGetRemoteInfo(T *testing.T) {
         TestRemoteInfoType{
             remoteBehind: 0, remoteAhead: 3, branches: Branches {
                 local: "",
-                remote: RemoteBranch{remote: "origin", branch: "branch"},
+                remote: RemoteBranch{remote: "origin",   branch: "branch"},
                 parent: RemoteBranch{remote: "upstream", branch: "master"},
             },
         } : fmt.Sprintf(REMOTE_AHEAD, "upstream/master", 3, "branch"),
@@ -281,7 +281,7 @@ func TestGetRemoteInfo(T *testing.T) {
         TestRemoteInfoType{
             remoteBehind: 1, remoteAhead: 2, branches: Branches {
                 local: "",
-                remote: RemoteBranch{remote: "origin", branch: "branch"},
+                remote: RemoteBranch{remote: "origin",   branch: "branch"},
                 parent: RemoteBranch{remote: "upstream", branch: "master"},
             },
         } : fmt.Sprintf(REMOTE_DIVERGED, "upstream/master", 1, 2, "branch"),
@@ -566,10 +566,7 @@ func TestNewGitData(T *testing.T) {
         GitData{ }: GitData{
             branches: Branches{
                 local: "<unset>",
-                parent: RemoteBranch{
-                    remote: "origin",
-                    branch: "master",
-                },
+                parent: RemoteBranch{ remote: "origin", branch: "master", },
             },
         },
     }

@@ -66,7 +66,19 @@ configuration in your local gitconfig file.
 If you don't set this git config variable, it will always compare you to
 origin/master.
 
-## Testing
+## Contributing
+
+* Follow the code styles of the current files
+* Comment your code
+* Separate functions that perform side effects as much as possible to make
+  testing easier
+* Every test should be passing after your change
+* At least one test should be written to test your change.
+* If any tests are failing after your change, the code must be fixed before it
+  will be merged (this may just be fixing the test if the expected behaviour of
+  the code has changed).
+
+### Testing
 
 You can run the automated tests with:
 
@@ -74,5 +86,9 @@ You can run the automated tests with:
 $ make test
 ```
 
-Every bug fix and added feature should be accompanied with tests that test the
-change and all tests should pass before pushing.
+Or you can run automated tests and open up a coverage report in your web
+browser:
+
+```bash
+$ make test-report
+```

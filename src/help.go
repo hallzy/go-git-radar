@@ -8,24 +8,24 @@ import (
 
 // Remove colour codes from string
 func clean(str string) string {
-    reg1, err := regexp.Compile("\x01\033\\[[^m]+");
-    if (err != nil) {
-        panic("Failed to clean colour codes from string.");
-    }
+    reg1, _ := regexp.Compile("\x01\033\\[[^m]+");
+    reg2, _ := regexp.Compile("m\x02");
+    return reg2.ReplaceAllString(reg1.ReplaceAllString(str, ""), "");
+}
 
-    reg2, err := regexp.Compile("m\x02");
-    if (err != nil) {
-        panic("Failed to clean colour codes from string.");
-    }
-
-    str1 := reg1.ReplaceAllString(str, "");
-    return reg2.ReplaceAllString(str1, "");
+// Count the number of lightning bolt emojis. They take up 2 columns of space so
+// that needs to be factored into the length calculation
+func countLightningBolts(str string) uint {
+    return uint(strings.Count(str, "⚡"));
 }
 
 // Find the length of the string (this works for strings with multibyte
 // characters)
 func strlen(str string) uint {
-    return uint(utf8.RuneCountInString(clean(str)));
+    // Lightning bolts are reduced down to 1 character using this function, but
+    // they actually take up 2 columns of space, so I need to add 1 to our
+    // strlen for every lightning bolt.
+    return uint(utf8.RuneCountInString(clean(str))) + countLightningBolts(str);
 }
 
 // Add lengths to a list of Examples
@@ -48,6 +48,23 @@ func maxLength(examples []Example) uint {
     }
 
     return max;
+}
+
+// Take the list of examples, and return them as a list of strings
+func getExamples(examples []Example) string {
+    var ret string = "";
+    var padding uint;
+
+    examplesWithLengths := insertLengths(examples);
+    maxLength           := maxLength(examplesWithLengths);
+
+    for _, example := range examplesWithLengths {
+        padding  = maxLength - example.length + 2;
+        ret     += example.prompt + strings.Repeat(" ", int(padding)) + "# " + example.description;
+        ret     += "\n";
+    }
+
+    return ret;
 }
 
 type Example struct {
@@ -222,21 +239,11 @@ func help() string {
         },
     };
 
-    examplesWithLengths := insertLengths(examples);
-    maxLength := maxLength(examplesWithLengths);
-
     var ret string = "";
     ret += "git-radar - a heads up display for git\n";
     ret += "\n";
     ret += "examples:\n";
-
-    var padding uint;
-    for _, example := range examplesWithLengths {
-        padding  = maxLength - example.length + 2;
-        ret     += example.prompt + strings.Repeat(" ", int(padding)) + "# " + example.description;
-        ret     += "\n";
-    }
-
+    ret += getExamples(examples);
     ret += "\n";
     ret += "usage:\n";
     ret += "  git-radar [help|fetch]\n";

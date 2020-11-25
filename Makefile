@@ -4,6 +4,9 @@ build: src src/config.go
 test: .scratch src tests symlinks
 	$(MAKE) -C .scratch test
 
+test-report: test
+	$(MAKE) -C .scratch test-report
+
 symlinks:
 	find src tests -name "*.go" -exec ln -sf ../{} .scratch \;
 

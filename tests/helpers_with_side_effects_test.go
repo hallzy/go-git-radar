@@ -4,7 +4,9 @@ import(
     "testing"
 )
 
-// Test clean(){{{
+var skipCases = map[string]string{};
+
+// Test getArgs(){{{
 func TestGetArgs(T *testing.T) {
     // The output is non deterministic, but it should have 3 elements
     output := getArgs();
@@ -39,6 +41,8 @@ func TestFileExists(T *testing.T) {
     for input, expected := range inputExpected {
         output := fileExists(input);
         if (output != expected) {
+            skipCases["TestFileRead"] = "TestFileRead(): Skipped because TestFileExists() failed.";
+            skipCases["TestFileWrite"] = "TestFileWrite(): Skipped because TestFileExists() failed.";
             T.Errorf("clean(): Got [%t], expected [%t] for input [%s]", output, expected, input);
         }
     }
@@ -46,9 +50,43 @@ func TestFileExists(T *testing.T) {
 // }}}
 // Test fileRead(){{{
 func TestFileRead(T *testing.T) {
+    if val, ok := skipCases["TestFileRead"]; ok {
+        T.Skip(val);
+    }
+
     output := fileRead("Makefile");
     if (len(output) <= 100) {
+        skipCases["TestFileWrite"] = "TestFileWrite(): Skipped because TestFileRead() failed.";
+
         T.Errorf("fileRead(): Failed");
+    }
+}
+// }}}
+// Test fileWrite(){{{
+func TestFileWrite(T *testing.T) {
+    if val, ok := skipCases["TestFileWrite"]; ok {
+        T.Skip(val);
+    }
+
+    file := "testfile-shouldnt-exist.txt";
+
+    if (fileExists(file)) {
+        T.Errorf("fileWrite(): test file [.scratch/" + file + "] already exists. Please. It should be automatically removed by the Makefile");
+        return;
+    }
+
+    toWrite := "This is a test file\n" + int2str(now());
+
+    ret := fileWrite(file, toWrite);
+    if (ret == false) {
+        T.Errorf("fileWrite(): Failed to write file");
+        return;
+    }
+
+    contents := fileRead(file);
+    if (contents != toWrite) {
+        T.Errorf("fileWrite(): Text read from file is not what was written");
+        return;
     }
 }
 // }}}

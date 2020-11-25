@@ -32,21 +32,16 @@ func TestStr2int(T *testing.T) {
     }
 
     // Run all tests that should fail
+    var output uint;
     for _, input := range inputPanic {
-        func() {
-            // Recover panics, I don't care about what the panic is though.
-            defer func() {
-                recover();
-            }();
-
-            // Attempt to convert
-            output := str2int(input);
-
-            // If I actually get to this point, then the function execution
-            // succeeded because the defer function didn't run. This is an error
-            // because all tests that are run here should panic
-            T.Errorf("str2int(): Input [%s] should have panicked, but got [%d]", input, output);
-        }();
+        panicHelper(
+            func() {
+                output = str2int(input);
+            },
+            func() {
+                T.Errorf("str2int(): Input [%s] should have panicked, but got [%d]", input, output);
+            },
+        );
     }
 }
 // }}}

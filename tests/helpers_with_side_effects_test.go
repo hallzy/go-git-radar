@@ -61,6 +61,15 @@ func TestFileRead(T *testing.T) {
 
         T.Errorf("fileRead(): Failed");
     }
+
+    panicHelper(
+        func() {
+            fileRead("/a/file/that/definitely/doesnt/exist");
+        },
+        func() {
+            T.Errorf("fileRead(): Panic test failed.");
+        },
+    );
 }
 // }}}
 // Test fileWrite(){{{
@@ -89,5 +98,14 @@ func TestFileWrite(T *testing.T) {
         T.Errorf("fileWrite(): Text read from file is not what was written");
         return;
     }
+
+    panicHelper(
+        func() {
+            fileWrite("/a/file/that/definitely/doesnt/exist", "data");
+        },
+        func() {
+            T.Errorf("fileRead(): Panic test failed.");
+        },
+    );
 }
 // }}}

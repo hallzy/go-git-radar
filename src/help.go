@@ -60,7 +60,7 @@ func getExamples(examples []Example) string {
 
     for _, example := range examplesWithLengths {
         padding  = maxLength - example.length + 2;
-        ret     += example.prompt + strings.Repeat(" ", int(padding)) + "# " + example.description;
+        ret     += "    " + example.prompt + strings.Repeat(" ", int(padding)) + "# " + example.description;
         ret     += "\n";
     }
 
@@ -239,24 +239,24 @@ func help() string {
         },
     };
 
-    var ret string = "";
-    ret += "git-radar - a heads up display for git\n";
+    var ret string = "\n";
+    ret += "  git-radar - a heads up display for git\n";
     ret += "\n";
-    ret += "examples:\n";
+    ret += "  examples:\n";
     ret += getExamples(examples);
     ret += "\n";
-    ret += "usage:\n";
-    ret += "  git-radar [help|fetch]\n";
+    ret += "  usage:\n";
+    ret += "    git-radar [help|fetch]\n";
     ret += "\n";
-    ret += "  fetch  # Fetches your repo asynchronously in the background every 5 mins\n";
-    ret += "  help   # Output this help text.\n";
+    ret += "    fetch  # Fetches your repo asynchronously in the background every 5 mins\n";
+    ret += "    help   # Output this help text.\n";
     ret += "\n";
-    ret += "Bash example:\n";
-    ret += "  export PS1=\"\\W\\$(git-radar bash fetch) \"\n";
+    ret += "  Bash example:\n";
+    ret += "    export PS1=\"\\$(git-radar fetch) \"\n";
     ret += "\n";
-    ret += "  This will show your current directory and the full git-radar.\n";
-    ret += "  As an added benefit, if you are in a repo, it will asynchronously\n";
-    ret += "  run `git fetch` every 5 mins, so that you are never out of date.\n";
+    ret += "    This will show your current directory and the full git-radar.\n";
+    ret += "    As an added benefit, if you are in a repo, it will asynchronously\n";
+    ret += "    run `git fetch` every 5 mins, so that you are never out of date.\n";
     ret += "\n";
 
     return ret;

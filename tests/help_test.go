@@ -109,8 +109,8 @@ func TestGetExamples(T *testing.T) {
         },
     };
 
-    expected := input[0].prompt +   "  # " + input[0].description + "\n";
-    expected += input[1].prompt + "    # " + input[1].description + "\n";
+    expected := "    " + input[0].prompt +   "  # " + input[0].description + "\n";
+    expected += "    " + input[1].prompt + "    # " + input[1].description + "\n";
 
     output := getExamples(input);
     if (output != expected) {

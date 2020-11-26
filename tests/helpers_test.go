@@ -3,7 +3,6 @@ package main
 import(
     "testing"
     "reflect"
-    "fmt"
 )
 
 // Test str2int{{{
@@ -60,6 +59,22 @@ func TestInt2str(T *testing.T) {
         if (output != expected) {
             T.Errorf("int2str(): Got [%s], expected [%s] for input [%d]", output, expected, input);
         }
+    }
+}
+// }}}
+// Test insertData(){{{
+func TestInsertData(T *testing.T) {
+    str := "%%HELLO%% | %%HELLO%% | %%BYE%% | %HELLO% | HELLO";
+    data := FormatData{
+        "HELLO": "Hello",
+        "BYE": "Bye",
+    };
+
+    expected := "Hello | Hello | Bye | %HELLO% | HELLO";
+
+    output := insertData(str, data);
+    if (output != expected) {
+        T.Errorf("int2str(): Got [%s], expected [%s] for input [%s, %+v]", output, expected, str, data);
     }
 }
 // }}}
@@ -243,7 +258,9 @@ func TestGetRemoteInfo(T *testing.T) {
                 remote: RemoteBranch{remote: "origin", branch: "master"},
                 parent: RemoteBranch{remote: "origin", branch: "master"},
             },
-        } : fmt.Sprintf(REMOTE_SAME, "master"),
+        } : insertData(REMOTE_SAME, FormatData{
+            "REMOTE_BRANCH": "master",
+        }),
 
         // Test remote equal
         TestRemoteInfoType{
@@ -252,7 +269,10 @@ func TestGetRemoteInfo(T *testing.T) {
                 remote: RemoteBranch{remote: "origin", branch: "branch"},
                 parent: RemoteBranch{remote: "origin", branch: "master"},
             },
-        } : fmt.Sprintf(REMOTE_EQUAL, "master", "branch"),
+        } : insertData(REMOTE_EQUAL, FormatData{
+            "PARENT_REMOTE_BRANCH": "master",
+            "REMOTE_BRANCH":        "branch",
+        }),
 
         // test remote behind
         TestRemoteInfoType{
@@ -261,7 +281,11 @@ func TestGetRemoteInfo(T *testing.T) {
                 remote: RemoteBranch{remote: "origin",   branch: "branch"},
                 parent: RemoteBranch{remote: "upstream", branch: "master"},
             },
-        } : fmt.Sprintf(REMOTE_BEHIND, "upstream/master", 1, "branch"),
+        } : insertData(REMOTE_BEHIND, FormatData{
+            "PARENT_REMOTE_BRANCH": "upstream/master",
+            "REMOTE_BEHIND":        "1",
+            "REMOTE_BRANCH":        "branch",
+        }),
 
         // test remote ahead
         TestRemoteInfoType{
@@ -270,7 +294,11 @@ func TestGetRemoteInfo(T *testing.T) {
                 remote: RemoteBranch{remote: "origin",   branch: "branch"},
                 parent: RemoteBranch{remote: "upstream", branch: "master"},
             },
-        } : fmt.Sprintf(REMOTE_AHEAD, "upstream/master", 3, "branch"),
+        } : insertData(REMOTE_AHEAD, FormatData{
+            "PARENT_REMOTE_BRANCH": "upstream/master",
+            "REMOTE_AHEAD":        "3",
+            "REMOTE_BRANCH":        "branch",
+        }),
 
         // test remote diverged
         TestRemoteInfoType{
@@ -279,7 +307,12 @@ func TestGetRemoteInfo(T *testing.T) {
                 remote: RemoteBranch{remote: "origin",   branch: "branch"},
                 parent: RemoteBranch{remote: "upstream", branch: "master"},
             },
-        } : fmt.Sprintf(REMOTE_DIVERGED, "upstream/master", 1, 2, "branch"),
+        } : insertData(REMOTE_DIVERGED, FormatData{
+            "PARENT_REMOTE_BRANCH": "upstream/master",
+            "REMOTE_BEHIND":        "1",
+            "REMOTE_AHEAD":         "2",
+            "REMOTE_BRANCH":        "branch",
+        }),
     }
 
     for input, expected := range inputExpected {
@@ -298,9 +331,12 @@ func TestGetLocalInfo(T *testing.T) {
     }
     inputExpected := map[TestDiff]string {
         TestDiff{ahead: 0, behind: 0}: "",
-        TestDiff{ahead: 1, behind: 2}: fmt.Sprintf(LOCAL_DIVERGED, 2, 1),
-        TestDiff{ahead: 0, behind: 3}: fmt.Sprintf(LOCAL_BEHIND, 3),
-        TestDiff{ahead: 2, behind: 0}: fmt.Sprintf(LOCAL_AHEAD, 2),
+        TestDiff{ahead: 1, behind: 2}: insertData(LOCAL_DIVERGED, FormatData{
+            "LOCAL_BEHIND":        "2",
+            "LOCAL_AHEAD":         "1",
+        }),
+        TestDiff{ahead: 0, behind: 3}: insertData(LOCAL_BEHIND, FormatData{ "LOCAL_BEHIND": "3", }),
+        TestDiff{ahead: 2, behind: 0}: insertData(LOCAL_AHEAD, FormatData{ "LOCAL_AHEAD": "2", }),
     }
 
     for input, expected := range inputExpected {
@@ -345,8 +381,8 @@ func TestShowUntracked(T *testing.T) {
             conflictUs:          5,
             conflictThem:        5,
             conflictBoth:        5,
-        }: " " + fmt.Sprintf(CHANGES_UNTRACKED, 2, "A"),
-    }
+        }: " " + insertData(CHANGES_UNTRACKED, FormatData{ "COUNT": "2" }),
+    };
 
     for input, expected := range inputExpected {
         output := showUntracked(input);
@@ -390,7 +426,7 @@ func TestShowConflicted(T *testing.T) {
             unstagedDeleted:     5,
             unstagedModified:    5,
             unstagedTypeChanged: 5,
-        }: " " + fmt.Sprintf(CHANGES_CONFLICTED, 1, "U"),
+        }: " " + insertData(CHANGES_CONFLICTED, FormatData{ "COUNT": "1", "SYMBOL": CONFLICT_US_SYM }),
         GitStatus{
             conflictUs:   0,
             conflictThem: 2,
@@ -406,7 +442,7 @@ func TestShowConflicted(T *testing.T) {
             unstagedDeleted:     5,
             unstagedModified:    5,
             unstagedTypeChanged: 5,
-        }: " " + fmt.Sprintf(CHANGES_CONFLICTED, 2, "T") + fmt.Sprintf(CHANGES_CONFLICTED, 3, "B"),
+        }: " " + insertData(CHANGES_CONFLICTED, FormatData{ "COUNT": "2", "SYMBOL": CONFLICT_THEM_SYM }) + insertData(CHANGES_CONFLICTED, FormatData{ "COUNT": "3", "SYMBOL": CONFLICT_BOTH_SYM }),
     }
 
     for input, expected := range inputExpected {
@@ -451,7 +487,7 @@ func TestShowStaged(T *testing.T) {
             unstagedModified:    5,
             unstagedTypeChanged: 5,
             untracked:           5,
-        }: " " + fmt.Sprintf(CHANGES_STAGED, 1, "A") + fmt.Sprintf(CHANGES_STAGED, 2, "D"),
+        }: " " + insertData(CHANGES_STAGED, FormatData{ "COUNT": "1", "SYMBOL": STAGED_ADDED_SYM }) + insertData(CHANGES_STAGED, FormatData{ "COUNT": "2", "SYMBOL": STAGED_DELETED_SYM }),
         GitStatus{
             stagedAdded:       0,
             stagedDeleted:     0,
@@ -467,7 +503,7 @@ func TestShowStaged(T *testing.T) {
             unstagedModified:    5,
             unstagedTypeChanged: 5,
             untracked:           5,
-        }: " " + fmt.Sprintf(CHANGES_STAGED, 3, "M") + fmt.Sprintf(CHANGES_STAGED, 4, "R"),
+        }: " " + insertData(CHANGES_STAGED, FormatData{ "COUNT": "3", "SYMBOL": STAGED_MODIFIED_SYM }) + insertData(CHANGES_STAGED, FormatData{ "COUNT": "4", "SYMBOL": STAGED_RENAMED_SYM }),
         GitStatus{
             stagedAdded:       0,
             stagedDeleted:     0,
@@ -483,7 +519,7 @@ func TestShowStaged(T *testing.T) {
             unstagedModified:    5,
             unstagedTypeChanged: 5,
             untracked:           5,
-        }: " " + fmt.Sprintf(CHANGES_STAGED, 6, "C") + fmt.Sprintf(CHANGES_STAGED, 7, "TC"),
+        }: " " + insertData(CHANGES_STAGED, FormatData{ "COUNT": "6", "SYMBOL": STAGED_COPIED_SYM }) + insertData(CHANGES_STAGED, FormatData{ "COUNT": "7", "SYMBOL": STAGED_TYPE_CHANGED_SYM }),
     }
 
     for input, expected := range inputExpected {
@@ -528,7 +564,7 @@ func TestShowUnstaged(T *testing.T) {
             stagedModified:    5,
             stagedRenamed:     5,
             stagedTypeChanged: 5,
-        }: " " + fmt.Sprintf(CHANGES_UNSTAGED, 1, "D") + fmt.Sprintf(CHANGES_UNSTAGED, 2, "M"),
+        }: " " + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "1", "SYMBOL": UNSTAGED_DELETED_SYM }) + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "2", "SYMBOL": UNSTAGED_MODIFIED_SYM }),
         GitStatus{
             unstagedDeleted:     4,
             unstagedModified:    0,
@@ -544,7 +580,7 @@ func TestShowUnstaged(T *testing.T) {
             stagedRenamed:     5,
             stagedTypeChanged: 5,
             untracked:         5,
-        }: " " + fmt.Sprintf(CHANGES_UNSTAGED, 4, "D") + fmt.Sprintf(CHANGES_UNSTAGED, 3, "TC"),
+        }: " " + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "4", "SYMBOL": UNSTAGED_DELETED_SYM }) + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "3", "SYMBOL": UNSTAGED_TYPE_CHANGED_SYM }),
     }
 
     for input, expected := range inputExpected {

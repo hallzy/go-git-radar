@@ -56,54 +56,78 @@ func getRemoteInfo(branches Branches, remoteBehind uint, remoteAhead uint) strin
 
     // If no remote, report the local branch as no upstream
     if (remote == "") {
-        return fmt.Sprintf(REMOTE_NOT_UPSTREAM, branches.local);
+        return insertData(REMOTE_NOT_UPSTREAM, FormatData{
+            "REMOTE_BRANCH": branches.local,
+        });
     }
 
     if (remoteBehind > 0 && remoteAhead > 0) {
-        return fmt.Sprintf(REMOTE_DIVERGED, parent, remoteBehind, remoteAhead, remote);
+        return insertData(REMOTE_DIVERGED, FormatData{
+            "PARENT_REMOTE_BRANCH": parent,
+            "REMOTE_BEHIND":        int2str(remoteBehind),
+            "REMOTE_AHEAD":         int2str(remoteAhead),
+            "REMOTE_BRANCH":        remote,
+        });
     }
 
     if (remoteAhead > 0) {
-        return fmt.Sprintf(REMOTE_AHEAD, parent, remoteAhead, remote);
+        return insertData(REMOTE_AHEAD, FormatData{
+            "PARENT_REMOTE_BRANCH": parent,
+            "REMOTE_AHEAD":         int2str(remoteAhead),
+            "REMOTE_BRANCH":        remote,
+        });
     }
 
     if (remoteBehind > 0) {
-        return fmt.Sprintf(REMOTE_BEHIND, parent, remoteBehind, remote);
+        return insertData(REMOTE_BEHIND, FormatData{
+            "PARENT_REMOTE_BRANCH": parent,
+            "REMOTE_BEHIND":        int2str(remoteBehind),
+            "REMOTE_BRANCH":        remote,
+        });
     }
 
     if (remote != parent) {
-        return fmt.Sprintf(REMOTE_EQUAL, parent, remote);
+        return insertData(REMOTE_EQUAL, FormatData{
+            "PARENT_REMOTE_BRANCH": parent,
+            "REMOTE_BRANCH":        remote,
+        });
     }
 
-    return fmt.Sprintf(REMOTE_SAME, remote);
+    return insertData(REMOTE_SAME, FormatData{
+        "REMOTE_BRANCH": remote,
+    });
 }
 
 // Return the formatted prompt string for local info
 func getLocalInfo(localBehind uint, localAhead uint) string {
     if (localBehind > 0 && localAhead > 0) {
-        return fmt.Sprintf(LOCAL_DIVERGED, localBehind, localAhead);
+        return insertData(LOCAL_DIVERGED, FormatData{
+            "LOCAL_BEHIND": int2str(localBehind),
+            "LOCAL_AHEAD": int2str(localAhead),
+        });
     }
 
     if (localAhead > 0) {
-        return fmt.Sprintf(LOCAL_AHEAD, localAhead);
+        return insertData(LOCAL_AHEAD, FormatData{
+            "LOCAL_AHEAD": int2str(localAhead),
+        });
     }
 
     if (localBehind > 0) {
-        return fmt.Sprintf(LOCAL_BEHIND, localBehind);
+        return insertData(LOCAL_BEHIND, FormatData{
+            "LOCAL_BEHIND": int2str(localBehind),
+        });
     }
 
     return "";
 }
 
-// Return the formatted prompt string for changed file information (modified,
-// deleted etc)
-func getChangeInfo(gitStatus GitStatus) string {
-    var staged     string = showStaged(gitStatus);
-    var unstaged   string = showUnstaged(gitStatus);
-    var conflicted string = showConflicted(gitStatus);
-    var untracked  string = showUntracked(gitStatus);
-
-    return staged + conflicted + unstaged + untracked;
+func insertData(str string, placeholderMap FormatData) string {
+    var ret string = str;
+    for placeholder, value := range placeholderMap {
+        ret = strings.ReplaceAll(ret, "%%" + placeholder + "%%", value);
+    }
+    return ret;
 }
 
 // Return the formatted prompt string for local info
@@ -112,7 +136,9 @@ func showUntracked(gitStatus GitStatus) string {
         return "";
     }
 
-    return " " + fmt.Sprintf(CHANGES_UNTRACKED, gitStatus.untracked, "A");
+    return " " + insertData(CHANGES_UNTRACKED, FormatData{
+        "COUNT": int2str(gitStatus.untracked),
+    });
 }
 
 // Return the formatted prompt string for conflicting files
@@ -120,15 +146,24 @@ func showConflicted(gitStatus GitStatus) string {
     var conflicted string = "";
 
     if (gitStatus.conflictUs > 0) {
-        conflicted += fmt.Sprintf(CHANGES_CONFLICTED, gitStatus.conflictUs, "U");
+        conflicted += insertData(CHANGES_CONFLICTED, FormatData{
+            "COUNT":  int2str(gitStatus.conflictUs),
+            "SYMBOL": CONFLICT_US_SYM,
+        });
     }
 
     if (gitStatus.conflictThem > 0) {
-        conflicted += fmt.Sprintf(CHANGES_CONFLICTED, gitStatus.conflictThem, "T");
+        conflicted += insertData(CHANGES_CONFLICTED, FormatData{
+            "COUNT":  int2str(gitStatus.conflictThem),
+            "SYMBOL": CONFLICT_THEM_SYM,
+        });
     }
 
     if (gitStatus.conflictBoth > 0) {
-        conflicted += fmt.Sprintf(CHANGES_CONFLICTED, gitStatus.conflictBoth, "B");
+        conflicted += insertData(CHANGES_CONFLICTED, FormatData{
+            "COUNT":  int2str(gitStatus.conflictBoth),
+            "SYMBOL": CONFLICT_BOTH_SYM,
+        });
     }
 
     if (conflicted == "") {
@@ -142,27 +177,45 @@ func showStaged(gitStatus GitStatus) string {
     var staged string = "";
 
     if (gitStatus.stagedAdded > 0) {
-        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedAdded, "A");
+        staged += insertData(CHANGES_STAGED, FormatData{
+            "COUNT":  int2str(gitStatus.stagedAdded),
+            "SYMBOL": STAGED_ADDED_SYM,
+        });
     }
 
     if (gitStatus.stagedDeleted > 0) {
-        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedDeleted, "D");
+        staged += insertData(CHANGES_STAGED, FormatData{
+            "COUNT":  int2str(gitStatus.stagedDeleted),
+            "SYMBOL": STAGED_DELETED_SYM,
+        });
     }
 
     if (gitStatus.stagedModified > 0) {
-        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedModified, "M");
+        staged += insertData(CHANGES_STAGED, FormatData{
+            "COUNT":  int2str(gitStatus.stagedModified),
+            "SYMBOL": STAGED_MODIFIED_SYM,
+        });
     }
 
     if (gitStatus.stagedRenamed > 0) {
-        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedRenamed, "R");
+        staged += insertData(CHANGES_STAGED, FormatData{
+            "COUNT":  int2str(gitStatus.stagedRenamed),
+            "SYMBOL": STAGED_RENAMED_SYM,
+        });
     }
 
     if (gitStatus.stagedCopied > 0) {
-        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedCopied, "C");
+        staged += insertData(CHANGES_STAGED, FormatData{
+            "COUNT":  int2str(gitStatus.stagedCopied),
+            "SYMBOL": STAGED_COPIED_SYM,
+        });
     }
 
     if (gitStatus.stagedTypeChanged > 0) {
-        staged += fmt.Sprintf(CHANGES_STAGED, gitStatus.stagedTypeChanged, "TC");
+        staged += insertData(CHANGES_STAGED, FormatData{
+            "COUNT":  int2str(gitStatus.stagedTypeChanged),
+            "SYMBOL": STAGED_TYPE_CHANGED_SYM,
+        });
     }
 
     if (staged == "") {
@@ -177,15 +230,24 @@ func showUnstaged(gitStatus GitStatus) string {
     var unstaged string = "";
 
     if (gitStatus.unstagedDeleted > 0) {
-        unstaged += fmt.Sprintf(CHANGES_UNSTAGED, gitStatus.unstagedDeleted, "D");
+        unstaged += insertData(CHANGES_UNSTAGED, FormatData{
+            "COUNT":  int2str(gitStatus.unstagedDeleted),
+            "SYMBOL": UNSTAGED_DELETED_SYM,
+        });
     }
 
     if (gitStatus.unstagedModified > 0) {
-        unstaged += fmt.Sprintf(CHANGES_UNSTAGED, gitStatus.unstagedModified, "M");
+        unstaged += insertData(CHANGES_UNSTAGED, FormatData{
+            "COUNT":  int2str(gitStatus.unstagedModified),
+            "SYMBOL": UNSTAGED_MODIFIED_SYM,
+        });
     }
 
     if (gitStatus.unstagedTypeChanged > 0) {
-        unstaged += fmt.Sprintf(CHANGES_UNSTAGED, gitStatus.unstagedTypeChanged, "TC");
+        unstaged += insertData(CHANGES_UNSTAGED, FormatData{
+            "COUNT":  int2str(gitStatus.unstagedTypeChanged),
+            "SYMBOL": UNSTAGED_TYPE_CHANGED_SYM,
+        });
     }
 
     if (unstaged == "") {
@@ -203,12 +265,25 @@ func showPrompt(git GitData) string {
 
     stash = "";
     if (git.stash != 0) {
-        stash = fmt.Sprintf(STASH_FORMAT, git.stash);
+        stash = insertData(STASH_FORMAT, FormatData{
+            "COUNT":  int2str(git.stash),
+        });
     }
 
-    change := getChangeInfo(git.status);
+    var staged     string = showStaged(git.status);
+    var conflicted string = showConflicted(git.status);
+    var unstaged   string = showUnstaged(git.status);
+    var untracked  string = showUntracked(git.status);
 
-    return fmt.Sprintf(PROMPT_FORMAT, PREFIX, remote, local, stash, change, SUFFIX);
+    return insertData(PROMPT_FORMAT, FormatData{
+        "REMOTE_STATUS":      remote,
+        "LOCAL_INFO":         local,
+        "STASH_STATUS":       stash,
+        "STAGED_CHANGES":     staged,
+        "CONFLICTED_CHANGES": conflicted,
+        "UNSTAGED_CHANGES":   unstaged,
+        "UNTRACKED_CHANGES":  untracked,
+    });
 }
 
 // Easy to use and remember regex function

@@ -1,5 +1,7 @@
 package main
 
+type FormatData map[string]string;
+
 // Custom type to keep track of important Git information for this program
 type GitData struct {
     // Whether or not the cwd is a git repository

@@ -3,48 +3,62 @@ package main
 // Number of seconds to wait before fetches
 var GIT_RADAR_FETCH_TIME uint = 5 * 60;
 
-// Pad the git-radar prompt with these
-var PREFIX string = "";
-var SUFFIX string = " ";
+const COLOUR_PREFIX string = "\x01\033[";
+const COLOUR_SUFFIX string = "m\x02";
 
+const END_COLOUR string  = COLOUR_PREFIX + "0" + COLOUR_SUFFIX;
 
-var COLOUR_PREFIX string = "\x01\033[";
-var COLOUR_SUFFIX string = "m\x02";
+const BOLD       string  = COLOUR_PREFIX + "1" + COLOUR_SUFFIX;
 
-var END_COLOUR string  = COLOUR_PREFIX + "0"    + COLOUR_SUFFIX;
+const BLACK      string  = COLOUR_PREFIX + "1;30" + COLOUR_SUFFIX;
+const RED        string  = COLOUR_PREFIX + "1;31" + COLOUR_SUFFIX;
+const GREEN      string  = COLOUR_PREFIX + "1;32" + COLOUR_SUFFIX;
+const YELLOW     string  = COLOUR_PREFIX + "1;33" + COLOUR_SUFFIX;
+const WHITE      string  = COLOUR_PREFIX + "0;37" + COLOUR_SUFFIX;
 
-var BOLD       string  = COLOUR_PREFIX + "1" + COLOUR_SUFFIX;
+// These are the formats used for REMOTE_STATUS in the PROMPT_FORMAT string.
+const REMOTE_BEHIND       string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + RED    + "→"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_DIVERGED     string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + YELLOW + "⇄"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_AHEAD        string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   GREEN  + "←"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_EQUAL        string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   BOLD   + "≈"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_NOT_UPSTREAM string =                                                                           RED    + "⚡" + END_COLOUR                        + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_SAME         string = WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
 
-var BLACK      string  = COLOUR_PREFIX + "1;30" + COLOUR_SUFFIX;
-var RED        string  = COLOUR_PREFIX + "1;31" + COLOUR_SUFFIX;
-var GREEN      string  = COLOUR_PREFIX + "1;32" + COLOUR_SUFFIX;
-var YELLOW     string  = COLOUR_PREFIX + "1;33" + COLOUR_SUFFIX;
-var WHITE      string  = COLOUR_PREFIX + "0;37" + COLOUR_SUFFIX;
+// These are the formats used for LOCAL_INFO in the PROMPT_FORMAT string.
+const LOCAL_AHEAD         string = " %%LOCAL_AHEAD%%"  + GREEN  + "↑" + END_COLOUR;
+const LOCAL_BEHIND        string = " %%LOCAL_BEHIND%%" + RED    + "↓" + END_COLOUR;
+const LOCAL_DIVERGED      string = " %%LOCAL_BEHIND%%" + YELLOW + "⇵" + END_COLOUR + "%%LOCAL_AHEAD%%";
 
-// printf style string to format different repo States
-var REMOTE_AHEAD        string = WHITE + "%s" + END_COLOUR + " " +         GREEN  + "←"  + END_COLOUR + " %d " + WHITE + "%s" + END_COLOUR;
-var REMOTE_BEHIND       string = WHITE + "%s" + END_COLOUR + " " + "%d " + RED    + "→"  + END_COLOUR +    " " + WHITE + "%s" + END_COLOUR;
-var REMOTE_DIVERGED     string = WHITE + "%s" + END_COLOUR + " " + "%d " + YELLOW + "⇄"  + END_COLOUR + " %d " + WHITE + "%s" + END_COLOUR;
-var REMOTE_EQUAL        string = WHITE + "%s" + END_COLOUR + " " +         BOLD   + "≈"  + END_COLOUR +    " " + WHITE + "%s" + END_COLOUR;
-var REMOTE_NOT_UPSTREAM string =                                           RED    + "⚡" + END_COLOUR +    " " + WHITE + "%s" + END_COLOUR;
-var REMOTE_SAME         string = WHITE + "%s" + END_COLOUR;
+// Symbols to use for different types of changes
+const UNTRACKED_SYM             string = "A";
+const STAGED_ADDED_SYM          string = "A";
+const STAGED_DELETED_SYM        string = "D";
+const STAGED_MODIFIED_SYM       string = "M";
+const STAGED_RENAMED_SYM        string = "R";
+const STAGED_COPIED_SYM         string = "C";
+const STAGED_TYPE_CHANGED_SYM   string = "TC";
+const UNSTAGED_DELETED_SYM      string = "D";
+const UNSTAGED_MODIFIED_SYM     string = "M";
+const UNSTAGED_TYPE_CHANGED_SYM string = "TC";
+const STASHED_SYM               string = "≡";
+const CONFLICT_US_SYM           string = "U";
+const CONFLICT_THEM_SYM         string = "T";
+const CONFLICT_BOTH_SYM         string = "B";
 
-var LOCAL_AHEAD         string = " %d" + GREEN  + "↑" + END_COLOUR;
-var LOCAL_BEHIND        string = " %d" + RED    + "↓" + END_COLOUR;
-var LOCAL_DIVERGED      string = " %d" + YELLOW + "⇵" + END_COLOUR + "%d";
+// Used for All of the staged values: deleted, modified, renamed, added etc
+const CHANGES_STAGED      string = "%%COUNT%%"  + GREEN  + "%%SYMBOL%%"   + END_COLOUR;
 
-var CHANGES_STAGED      string = "%d"  + GREEN  + "%s" + END_COLOUR;
-var CHANGES_UNSTAGED    string = "%d"  + RED    + "%s" + END_COLOUR;
-var CHANGES_CONFLICTED  string = "%d"  + YELLOW + "%s" + END_COLOUR;
-var CHANGES_UNTRACKED   string = "%d"  + WHITE  + "%s" + END_COLOUR;
-var STASH_FORMAT        string = " %d" + YELLOW + "≡"  + END_COLOUR;
+// Used for All of the unstaged values: deleted, modified, type change
+const CHANGES_UNSTAGED    string = "%%COUNT%%"  + RED    + "%%SYMBOL%%"   + END_COLOUR;
+
+// Used for All of the conflicted values: us, them, both
+const CHANGES_CONFLICTED  string = "%%COUNT%%"  + YELLOW + "%%SYMBOL%%"   + END_COLOUR;
+
+// Used Just for the untracked values
+const CHANGES_UNTRACKED   string = "%%COUNT%%"  + WHITE  + UNTRACKED_SYM  + END_COLOUR;
+
+// Used Just for the stashed values
+const STASH_FORMAT        string = " %%COUNT%%" + YELLOW + STASHED_SYM    + END_COLOUR;
 
 // Git radar prompt format
-// 1: Prefix
-// 2: Remote
-// 3: Branch
-// 4: Local
-// 5: Stash
-// 6: Change
-// 7: Suffix
-var PROMPT_FORMAT string = "%s" + BLACK + "git:(" + END_COLOUR + "%s%s" + BLACK + ")" + END_COLOUR + "%s%s%s";
+const PROMPT_FORMAT string = BLACK + "git:(" + END_COLOUR + "%%REMOTE_STATUS%%%%LOCAL_INFO%%" + BLACK + ")" + END_COLOUR + "%%STASH_STATUS%%%%STAGED_CHANGES%%%%CONFLICTED_CHANGES%%%%UNSTAGED_CHANGES%%%%UNTRACKED_CHANGES%% ";

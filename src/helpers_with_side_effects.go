@@ -7,8 +7,10 @@ package main
 
 import (
     "os"
+    "os/exec"
     "io/ioutil"
     "time"
+    "strings"
 )
 
 // Get command line arguments
@@ -47,3 +49,34 @@ func fileWrite(file string, data string) bool {
     return true;
 }
 
+func getCwd() string {
+    cwd, _ := runCmd("pwd");
+    return cwd;
+}
+
+// Run a command, but don't wait for it to finish
+func runCmdConcurrent(cmdStr string) {
+    var cmdArgs []string = strings.Split(cmdStr, " ");
+    cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...);
+    err := cmd.Start();
+
+    if (err != nil) {
+        panic("Concurrent command [" + cmdStr + "] failed.");
+    }
+}
+
+// Run a command, but don't trim the output
+func runCmdNoTrim(cmdStr string) (string, error) {
+    var cmdArgs []string = strings.Split(cmdStr, " ");
+    cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...);
+    out, err := cmd.Output();
+
+    return string(out), err;
+}
+
+// Run a command, trim the output
+func runCmd(cmdStr string) (string, error) {
+    o, e := runCmdNoTrim(cmdStr);
+
+    return trim(o), e;
+}

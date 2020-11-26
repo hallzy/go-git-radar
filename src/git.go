@@ -2,7 +2,6 @@ package main
 
 import (
     "strings"
-    "os/exec"
 )
 
 // =============================================================================
@@ -13,7 +12,7 @@ import (
 func getGitData() GitData {
     // Get the location of the .git folder
     var dotGit string = dotGit();
-    var isRepo bool   = isRepo(dotGit);
+    var isRepo bool   = isRepo(getCwd(), dotGit);
 
     // If we aren't in a repo, then don't bother continuing. Just set that this
     // isn't a repo
@@ -49,22 +48,6 @@ func getGitData() GitData {
         status:       getGitStatus(),
         stash:        gitStash(),
     };
-}
-
-func isRepo(dotGit string) bool {
-    // If no dot git path, or we are in the .git folder, then return false
-    if (dotGit == "" || dotGit == ".") {
-        return false;
-    }
-
-    cwd, err := runCmd("pwd");
-    if (err != nil) {
-        panic("Failed to retrieve the current working directory.");
-    }
-
-
-    // consider this not a repo if we are inside of a .git folder
-    return !strings.HasPrefix(cwd, dotGit + "/");
 }
 
 // Returns the path to the .git folder for the CWD
@@ -122,12 +105,7 @@ func getRemoteBranchName(localBranch string) RemoteBranch {
     // For the input branch, find out what the remote name is for it (probably
     // origin)
     remote, err := runCmd("git config --get branch." + localBranch + ".remote");
-    if (err != nil) {
-        return ret;
-    }
-
-    // If no remote, then assume no remote branch tracking
-    if (remote == "") {
+    if (err != nil || remote == "") {
         return ret;
     }
 
@@ -170,11 +148,7 @@ func getParentRemote() RemoteBranch {
     // Check to see if we have a git-radar tracking config to see if the parent
     // remote branch was saved
     out2, err := runCmd("git config --local branch." + out1 + ".git-radar-tracked-remote");
-    if (err != nil) {
-        return defaultRemote;
-    }
-
-    if (out2 == "") {
+    if (err != nil || out2 == "") {
         return defaultRemote;
     }
 
@@ -188,21 +162,11 @@ func getParentRemote() RemoteBranch {
 }
 
 // Common function for checking how far ahead/behind remote/local is.
-func aheadBehindHelper(toBranch string, fromBranch string, isAhead bool) uint {
+func aheadBehindHelper(toBranch string, fromBranch string, side string) uint {
     // If any of the branches are empty, or the branches are the same then there
     // is nothing to show.
     if (toBranch == "" || fromBranch == "" || toBranch == fromBranch) {
         return 0;
-    }
-
-    var side string;
-
-    // If we are checking how far ahead, then we want to use the --right-only
-    // option, otherwise --left-only
-    if (isAhead) {
-        side = "right-only";
-    } else {
-        side = "left-only";
     }
 
     out, err := runCmd("git rev-list --" + side + " --count " + fromBranch + "..." + toBranch);
@@ -214,19 +178,19 @@ func aheadBehindHelper(toBranch string, fromBranch string, isAhead bool) uint {
 }
 
 func howFarAheadRemote(remoteBranch string, parentRemote string) uint {
-    return aheadBehindHelper(remoteBranch, parentRemote, true);
+    return aheadBehindHelper(remoteBranch, parentRemote, "right-only");
 }
 
 func howFarBehindRemote(remoteBranch string, parentRemote string) uint {
-    return aheadBehindHelper(remoteBranch, parentRemote, false);
+    return aheadBehindHelper(remoteBranch, parentRemote, "left-only");
 }
 
 func howFarAheadLocal(remoteBranch string) uint {
-    return aheadBehindHelper("HEAD", remoteBranch, true);
+    return aheadBehindHelper("HEAD", remoteBranch, "right-only");
 }
 
 func howFarBehindLocal(remoteBranch string) uint {
-    return aheadBehindHelper("HEAD", remoteBranch, false);
+    return aheadBehindHelper("HEAD", remoteBranch, "left-only");
 }
 
 // Get the results of a git status of the current repo and parse the results
@@ -242,10 +206,8 @@ func getGitStatus() GitStatus {
     }
 
     // Split the string on new lines so that we have a list of lines of output
-    lines := strings.Split(porcelain, "\n");
-
     // parse the lines and add everything to a GitStatus structure
-    return parseGitStatus(lines);
+    return parseGitStatus(strings.Split(porcelain, "\n"));
 }
 
 // Run git stash and count how many stashes there are
@@ -280,31 +242,4 @@ func recordNewFetchTime(dotGit string) bool {
 
     fileWrite(file, int2str(now));
     return true;
-}
-
-// Run a command, but don't wait for it to finish
-func runCmdConcurrent(cmdStr string) {
-    var cmdArgs []string = strings.Split(cmdStr, " ");
-    cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...);
-    err := cmd.Start();
-
-    if (err != nil) {
-        panic("Concurrent command [" + cmdStr + "] failed.");
-    }
-}
-
-// Run a command, but don't trim the output
-func runCmdNoTrim(cmdStr string) (string, error) {
-    var cmdArgs []string = strings.Split(cmdStr, " ");
-    cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...);
-    out, err := cmd.Output();
-
-    return string(out), err;
-}
-
-// Run a command, trim the output
-func runCmd(cmdStr string) (string, error) {
-    o, e := runCmdNoTrim(cmdStr);
-
-    return trim(o), e;
 }

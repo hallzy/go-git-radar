@@ -574,3 +574,43 @@ func TestNewGitData(T *testing.T) {
     }
 }
 // }}}
+// Test isRepo(){{{
+func TestIsRepo(T *testing.T) {
+    type IsRepoData struct {
+        cwd    string;
+        dotGit string;
+    }
+
+    inputExpected := map[IsRepoData]bool {
+        // If . is the .git folder ,then that means we are in the .git folder,
+        // so the cwd can be ignored and this is not a repo
+        IsRepoData{cwd: "/home/test/repo/hello",               dotGit: "."}:                          false,
+
+        // If no git folder found, then not a git repo
+        IsRepoData{cwd: "/home/test/repo/hello",               dotGit: ""}:                           false,
+
+        // .git folder is in a subdirectory, which shouldn't happen
+        IsRepoData{cwd: "/home/test/repo",                     dotGit: "/home/test/repo/hello/.git"}: false,
+
+        // We are inside the .git folder, which should be ignored
+        IsRepoData{cwd: "/home/test/repo/hello/.git/branches", dotGit: "/home/test/repo/hello/.git"}: false,
+
+        // We are in a repo with the .git folder in the cwd which means we are
+        // in the root of the repo.
+        IsRepoData{cwd: "/home/test/repo/hello",               dotGit: ".git"}:                       true,
+
+        // We are in the root of the repo, but a full .git path was given
+        IsRepoData{cwd: "/home/test/repo/hello",               dotGit: "/home/test/repo/hello/.git"}: true,
+
+        // We are in a subdirectory of the repo
+        IsRepoData{cwd: "/home/test/repo/hello/somedir",       dotGit: "/home/test/repo/hello/.git"}: true,
+    }
+
+    for input, expected := range inputExpected {
+        output := isRepo(input.cwd, input.dotGit);
+        if (output != expected) {
+            T.Errorf("newGitData(): Got [%t], expected [%t] for input [%s, %s]", output, expected, input.cwd, input.dotGit);
+        }
+    }
+}
+// }}}

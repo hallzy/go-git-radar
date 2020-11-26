@@ -310,3 +310,28 @@ func newGitData(git GitData) GitData {
 
     return git;
 }
+
+// Check if cwd is in a git repo
+func isRepo(cwd string, dotGit string) bool {
+    // If no dot git path, or we are in the .git folder, then return false
+    if (dotGit == "" || dotGit == ".") {
+        return false;
+    }
+
+    // .git is a relative path, which means we are in the root of the repo
+    // So this is a repo
+    if (dotGit == ".git") {
+        return true;
+    }
+
+    // Find the root of the repo
+    reg1, _ := regexp.Compile("/.git$");
+    repoRoot := reg1.ReplaceAllString(dotGit, "");
+
+    // If the cwd isn't inside of the repository root, then we aren't in a repo.
+    if (!strings.HasPrefix(cwd, repoRoot)) {
+        return false;
+    }
+    // consider this not a repo if we are inside of a .git folder
+    return !strings.HasPrefix(cwd, dotGit + "/");
+}

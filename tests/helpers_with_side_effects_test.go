@@ -2,6 +2,7 @@ package main
 
 import(
     "testing"
+    "strings"
 )
 
 var skipCases = map[string]string{};
@@ -101,11 +102,23 @@ func TestFileWrite(T *testing.T) {
 
     panicHelper(
         func() {
+            // This file doesn't exist, and creating it would require modify
             fileWrite("/a/file/that/definitely/doesnt/exist", "data");
         },
         func() {
             T.Errorf("fileRead(): Panic test failed.");
         },
     );
+}
+// }}}
+// Test getCwd(){{{
+func TestGetCwd(T *testing.T) {
+    cwd := getCwd();
+
+    // Can't do much more than check that the end of the cwd is .scratch
+    if (!strings.HasSuffix(cwd, ".scratch")) {
+        T.Errorf("getCwd(): Failed to get cwd");
+        return;
+    }
 }
 // }}}

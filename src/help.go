@@ -98,6 +98,19 @@ func help() string {
             })),
         },
         {
+            description: "Auto fetching is in progress. You shouldn't do a pull or fetch when this is happening.",
+            prompt: showPrompt(newGitData(GitData{
+                fetching: true,
+                branches: Branches{
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "master",
+                    },
+                    local: "master",
+                },
+            })),
+        },
+        {
             description: "Created a new branch, but it isn't tracking any remote branches yet.",
             prompt: showPrompt(newGitData(GitData{
                 branches: Branches{

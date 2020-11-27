@@ -8,19 +8,26 @@ const COLOUR_SUFFIX string = "m\x02";
 
 const END_COLOUR string  = COLOUR_PREFIX + "0" + COLOUR_SUFFIX;
 
-const BOLD       string  = COLOUR_PREFIX + "1" + COLOUR_SUFFIX;
+// FORMATS
+const NORMAL     string  = "0";
+const BOLD       string  = "1";
 
-const BLACK      string  = COLOUR_PREFIX + "1;30" + COLOUR_SUFFIX;
-const RED        string  = COLOUR_PREFIX + "1;31" + COLOUR_SUFFIX;
-const GREEN      string  = COLOUR_PREFIX + "1;32" + COLOUR_SUFFIX;
-const YELLOW     string  = COLOUR_PREFIX + "1;33" + COLOUR_SUFFIX;
-const WHITE      string  = COLOUR_PREFIX + "0;37" + COLOUR_SUFFIX;
+// COLOURS
+const DEFAULT      string  = COLOUR_PREFIX + NORMAL         + COLOUR_SUFFIX;
+const BLACK        string  = COLOUR_PREFIX + BOLD   + ";30" + COLOUR_SUFFIX;
+const RED          string  = COLOUR_PREFIX + BOLD   + ";31" + COLOUR_SUFFIX;
+const GREEN        string  = COLOUR_PREFIX + BOLD   + ";32" + COLOUR_SUFFIX;
+const YELLOW       string  = COLOUR_PREFIX + BOLD   + ";33" + COLOUR_SUFFIX;
+const WHITE        string  = COLOUR_PREFIX + NORMAL + ";37" + COLOUR_SUFFIX;
+
+// Something to show when a fetch is currently in progress
+const FETCH_IN_PROGRESS string = " " + YELLOW + "↓" + END_COLOUR;
 
 // These are the formats used for REMOTE_STATUS in the PROMPT_FORMAT string.
 const REMOTE_BEHIND       string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + RED    + "→"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
 const REMOTE_DIVERGED     string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + YELLOW + "⇄"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
 const REMOTE_AHEAD        string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   GREEN  + "←"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
-const REMOTE_EQUAL        string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   BOLD   + "≈"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_EQUAL        string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   NORMAL + "≈"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
 const REMOTE_NOT_UPSTREAM string =                                                                           RED    + "⚡" + END_COLOUR                        + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
 const REMOTE_SAME         string = WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
 
@@ -77,4 +84,4 @@ const CHANGES_UNTRACKED   string = "%%COUNT%%" + WHITE  + "%%SYMBOL%%" + END_COL
 const STASH_FORMAT        string = "%%COUNT%%" + YELLOW + "%%SYMBOL%%" + END_COLOUR;
 
 // Git radar prompt format
-const PROMPT_FORMAT string = BLACK + "git:(" + END_COLOUR + "%%REMOTE_STATUS%%%%LOCAL_INFO%%" + BLACK + ")" + END_COLOUR + "%%STASH_STATUS%%%%STAGED_CHANGES%%%%CONFLICTED_CHANGES%%%%UNSTAGED_CHANGES%%%%UNTRACKED_CHANGES%% ";
+const PROMPT_FORMAT string = BLACK + "git:(" + END_COLOUR + "%%REMOTE_STATUS%%%%LOCAL_INFO%%%%FETCH_IN_PROGRESS%%" + BLACK + ")" + END_COLOUR + "%%STASH_STATUS%%%%STAGED_CHANGES%%%%CONFLICTED_CHANGES%%%%UNSTAGED_CHANGES%%%%UNTRACKED_CHANGES%% ";

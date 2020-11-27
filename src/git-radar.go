@@ -31,7 +31,7 @@ func main() {
     }
 
     if (isFetch) {
-        fetch(Git.dotGit);
+        Git.fetching = fetch(Git.dotGit);
     }
 
     // Print out the prompt with the given Git data

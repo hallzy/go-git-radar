@@ -29,6 +29,9 @@ type GitData struct {
 
     // How many stashes we have
     stash        uint;
+
+    // Whether or not we are fetching
+    fetching     bool;
 }
 
 // Custom type to save important git status information

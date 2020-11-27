@@ -125,8 +125,16 @@ func dotGit() string {
     return out;
 }
 
-// Runs git fetch if enough time has passed
+// Runs git fetch if enough time has passed. Return true if we are fetching, or
+// even if we are currently fetching from a previous fetch command
 func fetch(dotGit string) bool {
+    // If we are already fetching, then return true and no need to go any
+    // further
+    var fetchingFile string = dotGit + "/radar_fetching";
+    if (fileExists(fetchingFile)) {
+        return true;
+    }
+
     var now uint = now();
 
     // How long has it been since the last fetch was made?
@@ -139,7 +147,9 @@ func fetch(dotGit string) bool {
     }
 
     // run the fetch, and save the new fetch time in the fetch time file
-    runCmdConcurrent("git fetch --quiet");
+    // We are also creating and removing a file to tell us if we are currently
+    // fetching already
+    runCmdConcurrent("touch " + fetchingFile + " && git fetch --quiet && rm " + fetchingFile);
     recordNewFetchTime(dotGit);
 
     return true;

@@ -265,14 +265,17 @@ func showPrompt(git GitData) string {
     remote := getRemoteInfo(git.branches, git.remoteBehind, git.remoteAhead);
     local  := getLocalInfo(git.localBehind, git.localAhead);
 
-    var stash string;
-
-    stash = "";
+    var stash string = "";
     if (git.stash != 0) {
         stash = STASH_PREFIX + insertData(STASH_FORMAT, FormatData{
             "COUNT":  int2str(git.stash),
             "SYMBOL": STASHED_SYM,
         }) + STASH_SUFFIX;
+    }
+
+    var fetching string = "";
+    if (git.fetching) {
+        fetching = FETCH_IN_PROGRESS;
     }
 
     var staged     string = showStaged(git.status);
@@ -288,6 +291,7 @@ func showPrompt(git GitData) string {
         "CONFLICTED_CHANGES": conflicted,
         "UNSTAGED_CHANGES":   unstaged,
         "UNTRACKED_CHANGES":  untracked,
+        "FETCH_IN_PROGRESS":  fetching,
     });
 }
 

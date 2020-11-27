@@ -10,7 +10,6 @@ import (
     "os/exec"
     "io/ioutil"
     "time"
-    "strings"
 )
 
 // Get command line arguments
@@ -56,8 +55,7 @@ func getCwd() string {
 
 // Run a command, but don't wait for it to finish
 func runCmdConcurrent(cmdStr string) {
-    var cmdArgs []string = strings.Split(cmdStr, " ");
-    cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...);
+    cmd := exec.Command("/bin/sh", "-c", cmdStr);
     err := cmd.Start();
 
     if (err != nil) {
@@ -67,8 +65,7 @@ func runCmdConcurrent(cmdStr string) {
 
 // Run a command, but don't trim the output
 func runCmdNoTrim(cmdStr string) (string, error) {
-    var cmdArgs []string = strings.Split(cmdStr, " ");
-    cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...);
+    cmd := exec.Command("/bin/sh", "-c", cmdStr);
     out, err := cmd.Output();
 
     return string(out), err;

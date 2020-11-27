@@ -2,6 +2,7 @@ package main
 
 import (
     "strings"
+    "sync"
 )
 
 // =============================================================================
@@ -22,16 +23,80 @@ func getGitData() GitData {
             dotGit: dotGit,
         }
     }
-
     // This is a repo, so set everything else
 
-    // Save these in variables as they are needed for function calls below
-    var localBranch  string       = getLocalBranchName();
-    var remoteBranch RemoteBranch = getRemoteBranchName(localBranch);
-    var parentBranch RemoteBranch = getParentRemote();
+    var wg sync.WaitGroup;
 
-    var parentFull = getFullRemote(parentBranch);
-    var remoteFull = getFullRemote(remoteBranch);
+    // Save these in variables as they are needed for function calls below
+    var localAhead   uint;
+    var localBehind  uint;
+    var localBranch  string;
+    var parentBranch RemoteBranch;
+    var parentFull   string;
+    var remoteAhead  uint;
+    var remoteBehind uint;
+    var remoteBranch RemoteBranch;
+    var remoteFull   string;
+    var stash        uint;
+    var status       GitStatus;
+
+    // Git calls can be easily the slowest part of this program especially in
+    // large repos. So we will try to run them all asynchronously to try and
+    // speed this up.
+    wg.Add(7);
+
+    go func() {
+        defer wg.Done();
+        status = getGitStatus();
+    }();
+
+    go func() {
+        defer wg.Done();
+        stash = gitStash();
+    }();
+
+    go func() {
+        defer wg.Done();
+
+        var wg2 sync.WaitGroup;
+        wg2.Add(2);
+        go func() {
+            defer wg2.Done();
+            localBranch  = getLocalBranchName();
+            remoteBranch = getRemoteBranchName(localBranch);
+            remoteFull   = getFullRemote(remoteBranch);
+        }();
+
+        go func() {
+            defer wg2.Done();
+            parentBranch = getParentRemote();
+            parentFull   = getFullRemote(parentBranch);
+        }();
+
+        wg2.Wait();
+
+        go func() {
+            defer wg.Done();
+            remoteAhead = howFarAheadRemote(remoteFull, parentFull);
+        }();
+
+        go func() {
+            defer wg.Done();
+            remoteBehind = howFarBehindRemote(remoteFull, parentFull);
+        }();
+
+        go func() {
+            defer wg.Done();
+            localAhead = howFarAheadLocal(remoteFull);
+        }();
+
+        go func() {
+            defer wg.Done();
+            localBehind = howFarBehindLocal(remoteFull);
+        }();
+    }();
+
+    wg.Wait();
 
     return GitData {
         isRepo:     isRepo,
@@ -41,12 +106,12 @@ func getGitData() GitData {
             remote: remoteBranch,
             parent: parentBranch,
         },
-        remoteAhead:  howFarAheadRemote(remoteFull, parentFull),
-        remoteBehind: howFarBehindRemote(remoteFull, parentFull),
-        localAhead:   howFarAheadLocal(remoteFull),
-        localBehind:  howFarBehindLocal(remoteFull),
-        status:       getGitStatus(),
-        stash:        gitStash(),
+        remoteAhead:  remoteAhead,
+        remoteBehind: remoteBehind,
+        localAhead:   localAhead,
+        localBehind:  localBehind,
+        status:       status,
+        stash:        stash,
     };
 }
 

@@ -1,7 +1,7 @@
 package main
 
 // Number of seconds to wait before fetches
-var GIT_RADAR_FETCH_TIME uint = 5 * 60;
+const GIT_RADAR_FETCH_TIME uint = 5 * 60;
 
 const COLOUR_PREFIX string = "\x01\033[";
 const COLOUR_SUFFIX string = "m\x02";
@@ -45,20 +45,36 @@ const CONFLICT_US_SYM           string = "U";
 const CONFLICT_THEM_SYM         string = "T";
 const CONFLICT_BOTH_SYM         string = "B";
 
-// Used for All of the staged values: deleted, modified, renamed, added etc
-const CHANGES_STAGED      string = "%%COUNT%%"  + GREEN  + "%%SYMBOL%%"   + END_COLOUR;
+// Prefixes and suffixes for different parts of the changes section
+const STAGED_PREFIX string = " ";
+const STAGED_SUFFIX string = "";
 
-// Used for All of the unstaged values: deleted, modified, type change
-const CHANGES_UNSTAGED    string = "%%COUNT%%"  + RED    + "%%SYMBOL%%"   + END_COLOUR;
+const UNSTAGED_PREFIX string = " ";
+const UNSTAGED_SUFFIX string = "";
 
-// Used for All of the conflicted values: us, them, both
-const CHANGES_CONFLICTED  string = "%%COUNT%%"  + YELLOW + "%%SYMBOL%%"   + END_COLOUR;
+const UNTRACKED_PREFIX string = " ";
+const UNTRACKED_SUFFIX string = "";
+
+const CONFLICTED_PREFIX string = " ";
+const CONFLICTED_SUFFIX string = "";
+
+const STASH_PREFIX string = " ";
+const STASH_SUFFIX string = "";
+
+// Used for each of the staged values: deleted, modified, renamed, added etc
+const CHANGES_STAGED      string = "%%COUNT%%" + GREEN  + "%%SYMBOL%%" + END_COLOUR;
+
+// Used for each of the unstaged values: deleted, modified, type change
+const CHANGES_UNSTAGED    string = "%%COUNT%%" + RED    + "%%SYMBOL%%" + END_COLOUR;
+
+// Used for each of the conflicted values: us, them, both
+const CHANGES_CONFLICTED  string = "%%COUNT%%" + YELLOW + "%%SYMBOL%%" + END_COLOUR;
 
 // Used Just for the untracked values
-const CHANGES_UNTRACKED   string = "%%COUNT%%"  + WHITE  + UNTRACKED_SYM  + END_COLOUR;
+const CHANGES_UNTRACKED   string = "%%COUNT%%" + WHITE  + "%%SYMBOL%%" + END_COLOUR;
 
 // Used Just for the stashed values
-const STASH_FORMAT        string = " %%COUNT%%" + YELLOW + STASHED_SYM    + END_COLOUR;
+const STASH_FORMAT        string = "%%COUNT%%" + YELLOW + "%%SYMBOL%%" + END_COLOUR;
 
 // Git radar prompt format
 const PROMPT_FORMAT string = BLACK + "git:(" + END_COLOUR + "%%REMOTE_STATUS%%%%LOCAL_INFO%%" + BLACK + ")" + END_COLOUR + "%%STASH_STATUS%%%%STAGED_CHANGES%%%%CONFLICTED_CHANGES%%%%UNSTAGED_CHANGES%%%%UNTRACKED_CHANGES%% ";

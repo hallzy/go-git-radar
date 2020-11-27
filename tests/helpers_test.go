@@ -381,7 +381,7 @@ func TestShowUntracked(T *testing.T) {
             conflictUs:          5,
             conflictThem:        5,
             conflictBoth:        5,
-        }: " " + insertData(CHANGES_UNTRACKED, FormatData{ "COUNT": "2" }),
+        }: UNTRACKED_PREFIX + insertData(CHANGES_UNTRACKED, FormatData{ "COUNT": "2", "SYMBOL": UNTRACKED_SYM }) + UNTRACKED_SUFFIX,
     };
 
     for input, expected := range inputExpected {
@@ -426,7 +426,7 @@ func TestShowConflicted(T *testing.T) {
             unstagedDeleted:     5,
             unstagedModified:    5,
             unstagedTypeChanged: 5,
-        }: " " + insertData(CHANGES_CONFLICTED, FormatData{ "COUNT": "1", "SYMBOL": CONFLICT_US_SYM }),
+        }: CONFLICTED_PREFIX + insertData(CHANGES_CONFLICTED, FormatData{ "COUNT": "1", "SYMBOL": CONFLICT_US_SYM }) + CONFLICTED_SUFFIX,
         GitStatus{
             conflictUs:   0,
             conflictThem: 2,
@@ -442,7 +442,7 @@ func TestShowConflicted(T *testing.T) {
             unstagedDeleted:     5,
             unstagedModified:    5,
             unstagedTypeChanged: 5,
-        }: " " + insertData(CHANGES_CONFLICTED, FormatData{ "COUNT": "2", "SYMBOL": CONFLICT_THEM_SYM }) + insertData(CHANGES_CONFLICTED, FormatData{ "COUNT": "3", "SYMBOL": CONFLICT_BOTH_SYM }),
+        }: CONFLICTED_PREFIX + insertData(CHANGES_CONFLICTED, FormatData{ "COUNT": "2", "SYMBOL": CONFLICT_THEM_SYM }) + insertData(CHANGES_CONFLICTED, FormatData{ "COUNT": "3", "SYMBOL": CONFLICT_BOTH_SYM }) + CONFLICTED_SUFFIX,
     }
 
     for input, expected := range inputExpected {
@@ -487,7 +487,7 @@ func TestShowStaged(T *testing.T) {
             unstagedModified:    5,
             unstagedTypeChanged: 5,
             untracked:           5,
-        }: " " + insertData(CHANGES_STAGED, FormatData{ "COUNT": "1", "SYMBOL": STAGED_ADDED_SYM }) + insertData(CHANGES_STAGED, FormatData{ "COUNT": "2", "SYMBOL": STAGED_DELETED_SYM }),
+        }: STAGED_PREFIX + insertData(CHANGES_STAGED, FormatData{ "COUNT": "1", "SYMBOL": STAGED_ADDED_SYM }) + insertData(CHANGES_STAGED, FormatData{ "COUNT": "2", "SYMBOL": STAGED_DELETED_SYM }) + STAGED_SUFFIX,
         GitStatus{
             stagedAdded:       0,
             stagedDeleted:     0,
@@ -503,7 +503,7 @@ func TestShowStaged(T *testing.T) {
             unstagedModified:    5,
             unstagedTypeChanged: 5,
             untracked:           5,
-        }: " " + insertData(CHANGES_STAGED, FormatData{ "COUNT": "3", "SYMBOL": STAGED_MODIFIED_SYM }) + insertData(CHANGES_STAGED, FormatData{ "COUNT": "4", "SYMBOL": STAGED_RENAMED_SYM }),
+        }: STAGED_PREFIX + insertData(CHANGES_STAGED, FormatData{ "COUNT": "3", "SYMBOL": STAGED_MODIFIED_SYM }) + insertData(CHANGES_STAGED, FormatData{ "COUNT": "4", "SYMBOL": STAGED_RENAMED_SYM }) + STAGED_SUFFIX,
         GitStatus{
             stagedAdded:       0,
             stagedDeleted:     0,
@@ -519,7 +519,7 @@ func TestShowStaged(T *testing.T) {
             unstagedModified:    5,
             unstagedTypeChanged: 5,
             untracked:           5,
-        }: " " + insertData(CHANGES_STAGED, FormatData{ "COUNT": "6", "SYMBOL": STAGED_COPIED_SYM }) + insertData(CHANGES_STAGED, FormatData{ "COUNT": "7", "SYMBOL": STAGED_TYPE_CHANGED_SYM }),
+        }: STAGED_PREFIX + insertData(CHANGES_STAGED, FormatData{ "COUNT": "6", "SYMBOL": STAGED_COPIED_SYM }) + insertData(CHANGES_STAGED, FormatData{ "COUNT": "7", "SYMBOL": STAGED_TYPE_CHANGED_SYM }) + STAGED_SUFFIX,
     }
 
     for input, expected := range inputExpected {
@@ -564,7 +564,7 @@ func TestShowUnstaged(T *testing.T) {
             stagedModified:    5,
             stagedRenamed:     5,
             stagedTypeChanged: 5,
-        }: " " + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "1", "SYMBOL": UNSTAGED_DELETED_SYM }) + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "2", "SYMBOL": UNSTAGED_MODIFIED_SYM }),
+        }: UNSTAGED_PREFIX + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "1", "SYMBOL": UNSTAGED_DELETED_SYM }) + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "2", "SYMBOL": UNSTAGED_MODIFIED_SYM }) + UNSTAGED_SUFFIX,
         GitStatus{
             unstagedDeleted:     4,
             unstagedModified:    0,
@@ -580,7 +580,7 @@ func TestShowUnstaged(T *testing.T) {
             stagedRenamed:     5,
             stagedTypeChanged: 5,
             untracked:         5,
-        }: " " + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "4", "SYMBOL": UNSTAGED_DELETED_SYM }) + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "3", "SYMBOL": UNSTAGED_TYPE_CHANGED_SYM }),
+        }: UNSTAGED_PREFIX + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "4", "SYMBOL": UNSTAGED_DELETED_SYM }) + insertData(CHANGES_UNSTAGED, FormatData{ "COUNT": "3", "SYMBOL": UNSTAGED_TYPE_CHANGED_SYM }) + UNSTAGED_SUFFIX,
     }
 
     for input, expected := range inputExpected {

@@ -48,6 +48,17 @@ func getFullName(remoteBranch RemoteBranch) string {
     return remoteBranch.remote + "/" + remoteBranch.branch;
 }
 
+// Insert data into a format string
+// The keys of placeholderMap are the names of placeholders that are in str
+// The values of placeholderMap are what to replace those placeholders with
+func insertData(str string, placeholderMap FormatData) string {
+    var ret string = str;
+    for placeholder, value := range placeholderMap {
+        ret = strings.ReplaceAll(ret, "%%" + placeholder + "%%", value);
+    }
+    return ret;
+}
+
 // Given how many commits behind or ahead, return the formatted string used in
 // the prompt for remote info
 func getRemoteInfo(branches Branches, remoteBehind uint, remoteAhead uint) string {
@@ -122,23 +133,16 @@ func getLocalInfo(localBehind uint, localAhead uint) string {
     return "";
 }
 
-func insertData(str string, placeholderMap FormatData) string {
-    var ret string = str;
-    for placeholder, value := range placeholderMap {
-        ret = strings.ReplaceAll(ret, "%%" + placeholder + "%%", value);
-    }
-    return ret;
-}
-
 // Return the formatted prompt string for local info
 func showUntracked(gitStatus GitStatus) string {
     if (gitStatus.untracked == 0) {
         return "";
     }
 
-    return " " + insertData(CHANGES_UNTRACKED, FormatData{
-        "COUNT": int2str(gitStatus.untracked),
-    });
+    return UNTRACKED_PREFIX + insertData(CHANGES_UNTRACKED, FormatData{
+        "COUNT":  int2str(gitStatus.untracked),
+        "SYMBOL": UNTRACKED_SYM,
+    }) + UNTRACKED_SUFFIX;
 }
 
 // Return the formatted prompt string for conflicting files
@@ -169,7 +173,7 @@ func showConflicted(gitStatus GitStatus) string {
     if (conflicted == "") {
         return "";
     }
-    return " " + conflicted;
+    return CONFLICTED_PREFIX + conflicted + CONFLICTED_SUFFIX;
 }
 
 // Return the formatted prompt string for changed staged files
@@ -222,7 +226,7 @@ func showStaged(gitStatus GitStatus) string {
         return "";
     }
 
-    return " " + staged;
+    return STAGED_PREFIX + staged + STAGED_SUFFIX;
 }
 
 // Return the formatted prompt string for changed unstaged files
@@ -253,7 +257,7 @@ func showUnstaged(gitStatus GitStatus) string {
     if (unstaged == "") {
         return "";
     }
-    return " " + unstaged;
+    return UNSTAGED_PREFIX + unstaged + UNSTAGED_SUFFIX;
 }
 
 // Print out the whole prompt given some git Data
@@ -265,9 +269,10 @@ func showPrompt(git GitData) string {
 
     stash = "";
     if (git.stash != 0) {
-        stash = insertData(STASH_FORMAT, FormatData{
+        stash = STASH_PREFIX + insertData(STASH_FORMAT, FormatData{
             "COUNT":  int2str(git.stash),
-        });
+            "SYMBOL": STASHED_SYM,
+        }) + STASH_SUFFIX;
     }
 
     var staged     string = showStaged(git.status);

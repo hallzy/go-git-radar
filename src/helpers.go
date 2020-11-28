@@ -54,7 +54,7 @@ func getFullName(remoteBranch RemoteBranch) string {
 func insertData(str string, placeholderMap FormatData) string {
     var ret string = str;
     for placeholder, value := range placeholderMap {
-        ret = strings.ReplaceAll(ret, "%%" + placeholder + "%%", value);
+        ret = strings.Replace(ret, "%%" + placeholder + "%%", value, -1);
     }
     return ret;
 }

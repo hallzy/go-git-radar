@@ -164,14 +164,24 @@ func getLocalBranchName() string {
     }
 
     // If an error occurred above, then run this command which will give us a
-    // short hash
-    out2, err := runCmd("git rev-parse --short HEAD");
+    // hash
+    hash, err := runCmd("git rev-parse HEAD");
     if (err != nil) {
         panic("Failed to retrieve branch name: " + err.Error());
     }
 
-    // Return the hash and state detached head
-    return "detached@" + out2;
+    // Check to see if we currently have a tag checked out
+    tag, err := runCmd("git describe --tag " + hash + " --exact-match");
+
+    var tagOrHash string;
+    if (err == nil) {
+        tagOrHash = tag;
+    } else {
+        tagOrHash = hash[0:6];
+    }
+
+    // Return the first part of the hash and state detached head
+    return "detached@" + tagOrHash;
 }
 
 // Get the name of the remote tracking branch

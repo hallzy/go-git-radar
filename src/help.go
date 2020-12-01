@@ -250,6 +250,14 @@ func help() string {
                 stash: 3,
             })),
         },
+        {
+            description: "Checked out a tag called my-tag",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    local: "detached@my-tag",
+                },
+            })),
+        },
     };
 
     var ret string = "\n";

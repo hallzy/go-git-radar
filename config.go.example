@@ -1,7 +1,7 @@
 package main
 
 // Number of seconds to wait before fetches
-const GIT_RADAR_FETCH_TIME uint = 5 * 60;
+const GIT_RADAR_FETCH_TIME uint = 5* 60;
 
 const COLOUR_PREFIX string = "\x01\033[";
 const COLOUR_SUFFIX string = "m\x02";
@@ -24,11 +24,11 @@ const WHITE        string  = COLOUR_PREFIX + NORMAL + ";37" + COLOUR_SUFFIX;
 const FETCH_IN_PROGRESS string = " " + YELLOW + "↓" + END_COLOUR;
 
 // These are the formats used for REMOTE_STATUS in the PROMPT_FORMAT string.
-const REMOTE_BEHIND       string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + RED    + "→"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
-const REMOTE_DIVERGED     string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + YELLOW + "⇄"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
-const REMOTE_AHEAD        string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   GREEN  + "←"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
-const REMOTE_EQUAL        string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   NORMAL + "≈"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
-const REMOTE_NOT_UPSTREAM string =                                                                           RED    + "⚡" + END_COLOUR                        + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_BEHIND       string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + RED     + "→"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_DIVERGED     string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + YELLOW  + "⇄"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_AHEAD        string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   GREEN   + "←"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_EQUAL        string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   DEFAULT + "≈"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_NOT_UPSTREAM string =                                                                           RED     + "⚡" + END_COLOUR                        + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
 const REMOTE_SAME         string = WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
 
 // These are the formats used for LOCAL_INFO in the PROMPT_FORMAT string.

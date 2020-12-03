@@ -1,7 +1,7 @@
 package main
 
 // Number of seconds to wait before fetches
-const GIT_RADAR_FETCH_TIME uint = 5* 60;
+const GIT_RADAR_FETCH_TIME uint = 15 * 60;
 
 const COLOUR_PREFIX string = "\x01\033[";
 const COLOUR_SUFFIX string = "m\x02";
@@ -22,6 +22,25 @@ const WHITE        string  = COLOUR_PREFIX + NORMAL + ";37" + COLOUR_SUFFIX;
 
 // Something to show when a fetch is currently in progress
 const FETCH_IN_PROGRESS string = " " + YELLOW + "↓" + END_COLOUR;
+
+// Command or script to run when the fetch succeeds. This can be used to notify
+// yourself that the fetch has finished if fetching takes a long time
+// Set this variable to 'true' if you don't wan to use it.
+const FETCH_SUCCEEDED_CMD string = "true";
+
+// Same as above, but if the fetch failed
+// Set this variable to 'true' if you don't wan to use it.
+const FETCH_FAILED_CMD    string = "true";
+
+// Command to run before the fetch starts. If this command succeeds, then the
+// fetch will start
+// Set this variable to 'true' if you don't wan to use it.
+const PRE_FETCH_CMD        string = "true";
+
+// Command to run if the PRE_FETCH_CMD command fails. The fetch will not start
+// if this happens
+// Set this variable to 'true' if you don't wan to use it.
+const PRE_FETCH_CMD_FAILED string = "true";
 
 // These are the formats used for REMOTE_STATUS in the PROMPT_FORMAT string.
 const REMOTE_BEHIND       string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + RED     + "→"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;

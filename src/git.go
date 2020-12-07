@@ -11,16 +11,13 @@ import (
 
 // This function populates a GitData structure with current git information
 func getGitData() GitData {
-    // Get the location of the .git folder
-    var dotGit string = dotGit();
-    var isRepo bool   = isRepo(getCwd(), dotGit);
+    var isRepo bool   = isRepo();
 
     // If we aren't in a repo, then don't bother continuing. Just set that this
     // isn't a repo
     if (!isRepo) {
         return GitData {
             isRepo: isRepo,
-            dotGit: dotGit,
         }
     }
     // This is a repo, so set everything else
@@ -98,6 +95,8 @@ func getGitData() GitData {
 
     wg.Wait();
 
+    var dotGit string = dotGit();
+
     return GitData {
         isRepo:     isRepo,
         dotGit:     dotGit,
@@ -117,7 +116,7 @@ func getGitData() GitData {
 
 // Returns the path to the .git folder for the CWD
 func dotGit() string {
-    out, err := runCmd("git rev-parse --git-dir");
+    out, err := runCmd("git rev-parse --absolute-git-dir");
     if (err != nil) {
         return "";
     }
@@ -331,4 +330,14 @@ func recordNewFetchTime(dotGit string) bool {
 
     fileWrite(file, int2str(now));
     return true;
+}
+
+// Check if cwd is in a git repo
+func isRepo() bool {
+    out, err := runCmd("git rev-parse --is-inside-work-tree");
+    if (err != nil) {
+        return false;
+    }
+
+    return out == "true";
 }

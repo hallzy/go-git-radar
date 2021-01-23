@@ -146,13 +146,13 @@ func fetch(dotGit string) bool {
     }
 
     var preFetch   string = "( " + PRE_FETCH_CMD + " )";
-    var fetch      string = "( git fetch --quiet && ( (" + FETCH_SUCCEEDED_CMD + "); rm " + fetchingFile + " ) || ( (" + FETCH_FAILED_CMD + "); rm " + fetchingFile + "; ) )";
+    var fetch      string = "( git fetch --quiet && (" + FETCH_SUCCEEDED_CMD + ") || (" + FETCH_FAILED_CMD + ") )";
     var outerFetch string = "( touch " + fetchingFile + " && " + fetch + " || ( " + FETCH_FAILED_CMD + " ) )";
 
     // run the fetch, and save the new fetch time in the fetch time file
     // We are also creating and removing a file to tell us if we are currently
     // fetching already
-    runCmdConcurrent(preFetch + " && " + outerFetch + " || ( " + PRE_FETCH_CMD_FAILED + " )");
+    runCmdConcurrent("(" + preFetch + " && " + outerFetch + " || ( " + PRE_FETCH_CMD_FAILED + " )); rm " + fetchingFile);
     recordNewFetchTime(dotGit);
 
     return true;

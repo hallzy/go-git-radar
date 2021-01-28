@@ -66,6 +66,9 @@ $ git-radar fetch
 
 Note that this won't output anything if you are not in a git repository.
 
+Auto fetching is also done asynchronously, so you don't need to wait for the
+fetch to complete before you get your terminal prompt back.
+
 ### Add git-radar to your prompt
 
 Add something like this to your .bashrc file.
@@ -103,6 +106,45 @@ or
 $ make build
 ```
 
+### Recommended Git Alias
+
+Git Radar uses a custom git configuration to keep track of what the parent
+remote branch of your current branch is. This is so that Git Radar can tell you
+when your current remote branch is ahead or falls behind the parent.
+
+When I refer to a parent, I mean the branch that you branched from in order to
+make the branch that you are in currently. The presumption here is that
+eventually you will be merging back into that branch later, so knowing how far
+ahead or behind you are from it would help.
+
+This is a Git alias I created which automatically sets the git config option
+when you create a branch.
+
+```bash
+  cob = "!f() { \
+      currentTracking=\"$(git for-each-ref --format='%(upstream:short)' \"$(git symbolic-ref -q HEAD)\")\"; \
+      if [ -z \"$currentTracking\" ]; then \
+        echo \"Could not determine tracking info for current branch.\"; \
+        return; \
+      fi; \
+      git checkout -b \"$1\"; \
+      git config --local branch.\"$(git rev-parse --abbrev-ref HEAD)\".git-radar-parent-remote \"$currentTracking\"; \
+    }; \
+    f"
+```
+
+Now, when you want to create a new branch just do:
+
+```bash
+$ git cob <new-branch-name>
+```
+
+This will create a new branch and check it out for you, but will also set the
+configuration in your local gitconfig file.
+
+If you don't set this git config variable, it will always compare you to
+origin/master.
+
 ### Explanation of config.go
 
 The `config.go` file has several things that you can configure.
@@ -111,11 +153,6 @@ The `config.go` file has several things that you can configure.
 
 This is the number of seconds to wait before doing an auto fetch. This variable
 has no effect if you run git-radar without `fetch`.
-
-#### PREFIX and SUFFIX
-
-These are strings to prepend and append to the prompt in case you want some
-extra padding or something else.
 
 #### COLOUR_PREFIX and COLOUR_SUFFIX
 
@@ -126,6 +163,11 @@ These variables are ONLY used inside this config file, so you can choose to
 remove them completely as long as you remove all references to them in the
 config.go file.
 
+#### END_COLOUR
+
+This is a code that tells the terminal to end the colour, or styling you are
+adding.
+
 #### BOLD, BLACK, RED etc
 
 These are colour codes that are used in git-radar to colour the text.
@@ -133,6 +175,41 @@ These are colour codes that are used in git-radar to colour the text.
 These are only used inside the config.go file, so you can choose to remove them
 or add more colours as needed so long as you update their usage elsewhere in the
 config.go file.
+
+#### FETCH_IN_PROGRESS
+
+This defines a string that is used if git-radar is currently in the middle of an
+automated fetch.
+
+#### FETCH_SUCCEEDED_CMD
+
+This is a terminal command that should run if the automated fetch succeeded.
+
+For example, you could have it run a command or script that gives you a popup
+notification
+
+#### FETCH_FAILED_CMD
+
+This is a terminal command that should run if the automated fetch fails.
+
+For example, you could have it run a command or script that gives you a popup
+notification
+
+#### PRE_FETCH_CMD
+
+This is a terminal command that should run just before the automated fetch
+starts.
+
+For example, you could have it run a command or script that gives you a popup
+notification
+
+#### PRE_FETCH_CMD_FAILED
+
+This is a terminal command that should run if the PRE_FETCH_CMD fails (ie. the
+PRE_FETCH_COMMAND returns non 0)
+
+For example, you could have it run a command or script that gives you a popup
+notification
 
 #### REMOTE_AHEAD
 
@@ -216,93 +293,38 @@ data that will be filled in from the code.
 `LOCAL_DIVERGED` must exist, but you can change it to be whatever you want.
 Just make sure that the placeholders are in the same expected order.
 
-#### CHANGES_STAGED
+#### *_SYM
 
-This defines a string that is used to show staged changes. The `%s` and `%d` are
-placeholders for data that will be filled in from the code.
+These are the symbols that will be used to denote certain git states. You can
+change them if you would like there to be a different symbol for a specific git
+state.
 
-`CHANGES_STAGED` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
+#### STAGED, UNSTAGED, UNTRACKED, CONFLICTED, STASH PREFIX and SUFFIX
 
-#### CHANGES_UNSTAGED
+These are strings that you can place before or after separate groups of git
+state. For instance, if you want your staged stats to be separated by `|`, then
+you can do so.
 
-This defines a string that is used to show unstaged changes. The `%s` and `%d`
-are placeholders for data that will be filled in from the code.
+#### CHANGES STAGED, UNSTAGED, CONFLICTED, UNTRACKED and STASH_FORMAT
 
-`CHANGES_UNSTAGED` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
+These are use to show the stats for the different types of changes. For example,
+Changes Staged will be used for each of the different types of changes such as
+modified, added, deleted etc.
 
-#### CHANGES_CONFLICTED
+The `%%COUNT%%` is a placeholder for git-radar to automatically add the amount
+of items that match this type of change.
 
-This defines a string that is used to show conflicts. The `%s` and `%d`
-are placeholders for data that will be filled in from the code.
-
-`CHANGES_CONFLICTED` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
-
-#### CHANGES_UNTRACKED
-
-This defines a string that is used to show untracked files. The `%s` and `%d`
-are placeholders for data that will be filled in from the code.
-
-`CHANGES_UNTRACKED` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
-
-#### STASH_FORMAT
-
-This defines a string that is used to show the current stash state. The `%s` and
-`%d` are placeholders for data that will be filled in from the code.
-
-`STASH_FORMAT` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
+The `%%SYMBOL%%` is a placeholder for git-radar to automatically add the correct
+symbol that you define in the `*_SYM` section.
 
 #### PROMPT_FORMAT
 
 This defines a string that is used for the full prompt that you see on screen.
-The `%s` and `%d` are placeholders for data that will be filled in from the
-code.
+
+You have full control over what your prompt shows, so remove or move things as
+necessary.
 
 `PROMPT_FORMAT` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
-
-### Recommended Git Alias
-
-Git Radar uses a custom git configuration to keep track of what the parent
-remote branch of your current branch is. This is so that Git Radar can tell you
-when your current remote branch is ahead or falls behind the parent.
-
-When I refer to a parent, I mean the branch that you branched from in order to
-make the branch that you are in currently. The presumption here is that
-eventually you will be merging back into that branch later, so knowing how far
-ahead or behind you are from it would help.
-
-This is a Git alias I created which automatically sets the git config option
-when you create a branch.
-
-```bash
-  cob = "!f() { \
-      currentTracking=\"$(git for-each-ref --format='%(upstream:short)' \"$(git symbolic-ref -q HEAD)\")\"; \
-      if [ -z \"$currentTracking\" ]; then \
-        echo \"Could not determine tracking info for current branch.\"; \
-        return; \
-      fi; \
-      git checkout -b \"$1\"; \
-      git config --local branch.\"$(git rev-parse --abbrev-ref HEAD)\".git-radar-parent-remote \"$currentTracking\"; \
-    }; \
-    f"
-```
-
-Now, when you want to create a new branch just do:
-
-```bash
-$ git cob <new-branch-name>
-```
-
-This will create a new branch and check it out for you, but will also set the
-configuration in your local gitconfig file.
-
-If you don't set this git config variable, it will always compare you to
-origin/master.
 
 ## Contributing
 

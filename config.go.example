@@ -43,12 +43,19 @@ const PRE_FETCH_CMD        string = "true";
 const PRE_FETCH_CMD_FAILED string = "true";
 
 // These are the formats used for REMOTE_STATUS in the PROMPT_FORMAT string.
-const REMOTE_BEHIND       string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + RED     + "→"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
-const REMOTE_DIVERGED     string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + YELLOW  + "⇄"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
-const REMOTE_AHEAD        string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   GREEN   + "←"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
-const REMOTE_EQUAL        string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   DEFAULT + "≈"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
-const REMOTE_NOT_UPSTREAM string =                                                                           RED     + "⚡" + END_COLOUR                        + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
-const REMOTE_SAME         string = WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_BEHIND           string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + RED     + "→"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_DIVERGED         string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " %%REMOTE_BEHIND%% " + YELLOW  + "⇄"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_AHEAD            string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   GREEN   + "←"  + END_COLOUR + " %%REMOTE_AHEAD%% " + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_EQUAL            string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   DEFAULT + "≈"  + END_COLOUR + " "                  + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+// If no upstream branch is set at all
+const REMOTE_NOT_UPSTREAM     string =                                                                           RED     + "⚡" + END_COLOUR                        + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+// If upstream branch is set, but doesn't exist
+const REMOTE_NO_SUCH_UPSTREAM string = WHITE + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   RED     + "⚡" + END_COLOUR                        + RED   + "%%REMOTE_BRANCH%%" + END_COLOUR;
+// If parent remote is set, but doesn't exist
+const REMOTE_NO_SUCH_PARENT   string = RED   + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   RED     + "⚡" + END_COLOUR                        + WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
+// If parent remote is set and upstream branch is set, but neither exist
+const REMOTE_NO_SUCH_REMOTES  string = RED   + "%%PARENT_REMOTE_BRANCH%%" + END_COLOUR + " " +                   RED     + "⚡" + END_COLOUR                        + RED   + "%%REMOTE_BRANCH%%" + END_COLOUR;
+const REMOTE_SAME             string = WHITE + "%%REMOTE_BRANCH%%" + END_COLOUR;
 
 // These are the formats used for LOCAL_INFO in the PROMPT_FORMAT string.
 const LOCAL_AHEAD         string = " %%LOCAL_AHEAD%%"  + GREEN  + "↑" + END_COLOUR;

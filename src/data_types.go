@@ -69,4 +69,5 @@ type Branches struct {
 type RemoteBranch struct {
     remote string;
     branch string;
+    exists bool;
 }

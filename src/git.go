@@ -59,15 +59,17 @@ func getGitData() GitData {
         wg2.Add(2);
         go func() {
             defer wg2.Done();
-            localBranch  = getLocalBranchName();
-            remoteBranch = getRemoteBranchName(localBranch);
-            remoteFull   = getFullRemote(remoteBranch);
+            localBranch         = getLocalBranchName();
+            remoteBranch        = getRemoteBranchName(localBranch);
+            remoteFull          = getFullRemote(remoteBranch);
+            remoteBranch.exists = doesRemoteExist(remoteFull);
         }();
 
         go func() {
             defer wg2.Done();
-            parentBranch = getParentRemote();
-            parentFull   = getFullRemote(parentBranch);
+            parentBranch        = getParentRemote();
+            parentFull          = getFullRemote(parentBranch);
+            parentBranch.exists = doesRemoteExist(parentFull);
         }();
 
         wg2.Wait();
@@ -216,6 +218,18 @@ func getRemoteBranchName(localBranch string) RemoteBranch {
     ret.branch = remoteMergeBranch;
 
     return ret;
+}
+
+func doesRemoteExist(remoteFull string) bool {
+    if remoteFull == "" {
+        return false;
+    }
+
+    _, err := runCmd("git show-branch " + remoteFull);
+    if (err != nil) {
+        return false;
+    }
+    return true;
 }
 
 // Get the remote branch that the current branch is based on

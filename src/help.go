@@ -89,9 +89,13 @@ func help() string {
             description: "You are in your master branch and are tracking origin master",
             prompt: showPrompt(newGitData(GitData{
                 branches: Branches{
+                    parent: RemoteBranch{
+                        exists: true,
+                    },
                     remote: RemoteBranch{
                         remote: "origin",
                         branch: "master",
+                        exists: true,
                     },
                     local: "master",
                 },
@@ -102,9 +106,13 @@ func help() string {
             prompt: showPrompt(newGitData(GitData{
                 fetching: true,
                 branches: Branches{
+                    parent: RemoteBranch{
+                        exists: true,
+                    },
                     remote: RemoteBranch{
                         remote: "origin",
                         branch: "master",
+                        exists: true,
                     },
                     local: "master",
                 },
@@ -122,9 +130,13 @@ func help() string {
             description: "2 New files that aren't being tracked yet. Branch is tracking origin/my-branch and parent is origin/master",
             prompt: showPrompt(newGitData(GitData{
                 branches: Branches{
+                    parent: RemoteBranch{
+                        exists: true,
+                    },
                     remote: RemoteBranch{
                         remote: "origin",
                         branch: "my-branch",
+                        exists: true,
                     },
                     local: "my-branch",
                 },
@@ -140,10 +152,12 @@ func help() string {
                     remote: RemoteBranch{
                         remote: "origin",
                         branch: "my-branch",
+                        exists: true,
                     },
                     parent: RemoteBranch{
                         remote: "upstream",
                         branch: "dev",
+                        exists: true,
                     },
                     local: "my-branch",
                 },
@@ -156,9 +170,13 @@ func help() string {
             description: "1 new file staged to commit and 3 modifications that we still need to `git add`",
             prompt: showPrompt(newGitData(GitData{
                 branches: Branches{
+                    parent: RemoteBranch{
+                        exists: true,
+                    },
                     remote: RemoteBranch{
                         remote: "origin",
                         branch: "my-branch",
+                        exists: true,
                     },
                     local: "my-branch",
                 },
@@ -172,9 +190,13 @@ func help() string {
             description: "3 Commits waiting to be pushed to remote, origin/my-branch is behind origin/master by 2 commits.",
             prompt: showPrompt(newGitData(GitData{
                 branches: Branches{
+                    parent: RemoteBranch{
+                        exists: true,
+                    },
                     remote: RemoteBranch{
                         remote: "origin",
                         branch: "my-branch",
+                        exists: true,
                     },
                     local: "my-branch",
                 },
@@ -186,9 +208,13 @@ func help() string {
             description: "our commits pushed up, my-branch and its parent have diverged",
             prompt: showPrompt(newGitData(GitData{
                 branches: Branches{
+                    parent: RemoteBranch{
+                        exists: true,
+                    },
                     remote: RemoteBranch{
                         remote: "origin",
                         branch: "my-branch",
+                        exists: true,
                     },
                     local: "my-branch",
                 },
@@ -212,9 +238,13 @@ func help() string {
             description: "rebase complete, our rewritten commits now need pushed up",
             prompt: showPrompt(newGitData(GitData{
                 branches: Branches{
+                    parent: RemoteBranch{
+                        exists: true,
+                    },
                     remote: RemoteBranch{
                         remote: "origin",
                         branch: "my-branch",
+                        exists: true,
                     },
                     local: "my-branch",
                 },
@@ -228,9 +258,13 @@ func help() string {
             description: "origin/my-branch is 3 commits ahead of it's parent branch",
             prompt: showPrompt(newGitData(GitData{
                 branches: Branches{
+                    parent: RemoteBranch{
+                        exists: true,
+                    },
                     remote: RemoteBranch{
                         remote: "origin",
                         branch: "my-branch",
+                        exists: true,
                     },
                     local: "my-branch",
                 },
@@ -241,9 +275,13 @@ func help() string {
             description: "You have 3 stashes stored",
             prompt: showPrompt(newGitData(GitData{
                 branches: Branches{
+                    parent: RemoteBranch{
+                        exists: true,
+                    },
                     remote: RemoteBranch{
                         remote: "origin",
                         branch: "my-branch",
+                        exists: true,
                     },
                     local: "my-branch",
                 },
@@ -255,6 +293,54 @@ func help() string {
             prompt: showPrompt(newGitData(GitData{
                 branches: Branches{
                     local: "detached@my-tag",
+                },
+            })),
+        },
+        {
+            description: "Remote Tracking Branch Doesn't exist",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    parent: RemoteBranch{
+                        exists: true,
+                    },
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "my-branch",
+                        exists: false,
+                    },
+                    local: "my-branch",
+                },
+            })),
+        },
+        {
+            description: "Parent Tracking Branch Doesn't exist",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    parent: RemoteBranch{
+                        exists: false,
+                    },
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "my-branch",
+                        exists: true,
+                    },
+                    local: "my-branch",
+                },
+            })),
+        },
+        {
+            description: "Parent and Remote Tracking Branch Doesn't exist",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    parent: RemoteBranch{
+                        exists: false,
+                    },
+                    remote: RemoteBranch{
+                        remote: "origin",
+                        branch: "my-branch",
+                        exists: false,
+                    },
+                    local: "my-branch",
                 },
             })),
         },

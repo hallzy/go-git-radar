@@ -255,8 +255,8 @@ func TestGetRemoteInfo(T *testing.T) {
         TestRemoteInfoType{
             remoteBehind: 0, remoteAhead: 0, branches: Branches {
                 local: "",
-                remote: RemoteBranch{remote: "origin", branch: "master"},
-                parent: RemoteBranch{remote: "origin", branch: "master"},
+                remote: RemoteBranch{remote: "origin", branch: "master", exists: true},
+                parent: RemoteBranch{remote: "origin", branch: "master", exists: true},
             },
         } : insertData(REMOTE_SAME, FormatData{
             "REMOTE_BRANCH": "master",
@@ -266,8 +266,8 @@ func TestGetRemoteInfo(T *testing.T) {
         TestRemoteInfoType{
             remoteBehind: 0, remoteAhead: 0, branches: Branches {
                 local: "",
-                remote: RemoteBranch{remote: "origin", branch: "branch"},
-                parent: RemoteBranch{remote: "origin", branch: "master"},
+                remote: RemoteBranch{remote: "origin", branch: "branch", exists: true},
+                parent: RemoteBranch{remote: "origin", branch: "master", exists: true},
             },
         } : insertData(REMOTE_EQUAL, FormatData{
             "PARENT_REMOTE_BRANCH": "master",
@@ -278,8 +278,8 @@ func TestGetRemoteInfo(T *testing.T) {
         TestRemoteInfoType{
             remoteBehind: 1, remoteAhead: 0, branches: Branches {
                 local: "",
-                remote: RemoteBranch{remote: "origin",   branch: "branch"},
-                parent: RemoteBranch{remote: "upstream", branch: "master"},
+                remote: RemoteBranch{remote: "origin",   branch: "branch", exists: true},
+                parent: RemoteBranch{remote: "upstream", branch: "master", exists: true},
             },
         } : insertData(REMOTE_BEHIND, FormatData{
             "PARENT_REMOTE_BRANCH": "upstream/master",
@@ -291,8 +291,8 @@ func TestGetRemoteInfo(T *testing.T) {
         TestRemoteInfoType{
             remoteBehind: 0, remoteAhead: 3, branches: Branches {
                 local: "",
-                remote: RemoteBranch{remote: "origin",   branch: "branch"},
-                parent: RemoteBranch{remote: "upstream", branch: "master"},
+                remote: RemoteBranch{remote: "origin",   branch: "branch", exists: true},
+                parent: RemoteBranch{remote: "upstream", branch: "master", exists: true},
             },
         } : insertData(REMOTE_AHEAD, FormatData{
             "PARENT_REMOTE_BRANCH": "upstream/master",
@@ -304,13 +304,49 @@ func TestGetRemoteInfo(T *testing.T) {
         TestRemoteInfoType{
             remoteBehind: 1, remoteAhead: 2, branches: Branches {
                 local: "",
-                remote: RemoteBranch{remote: "origin",   branch: "branch"},
-                parent: RemoteBranch{remote: "upstream", branch: "master"},
+                remote: RemoteBranch{remote: "origin",   branch: "branch", exists: true},
+                parent: RemoteBranch{remote: "upstream", branch: "master", exists: true},
             },
         } : insertData(REMOTE_DIVERGED, FormatData{
             "PARENT_REMOTE_BRANCH": "upstream/master",
             "REMOTE_BEHIND":        "1",
             "REMOTE_AHEAD":         "2",
+            "REMOTE_BRANCH":        "branch",
+        }),
+
+        // Test Remote doesn't exist
+        TestRemoteInfoType{
+            remoteBehind: 1, remoteAhead: 2, branches: Branches {
+                local: "",
+                remote: RemoteBranch{remote: "origin",   branch: "branch", exists: false},
+                parent: RemoteBranch{remote: "upstream", branch: "master", exists: true},
+            },
+        } : insertData(REMOTE_NO_SUCH_UPSTREAM, FormatData{
+            "PARENT_REMOTE_BRANCH": "upstream/master",
+            "REMOTE_BRANCH":        "branch",
+        }),
+
+        // Test Parent Remote doesn't exist
+        TestRemoteInfoType{
+            remoteBehind: 1, remoteAhead: 2, branches: Branches {
+                local: "",
+                remote: RemoteBranch{remote: "origin",   branch: "branch", exists: true},
+                parent: RemoteBranch{remote: "upstream", branch: "master", exists: false},
+            },
+        } : insertData(REMOTE_NO_SUCH_PARENT, FormatData{
+            "PARENT_REMOTE_BRANCH": "upstream/master",
+            "REMOTE_BRANCH":        "branch",
+        }),
+
+        // Test Remotes doesn't exist
+        TestRemoteInfoType{
+            remoteBehind: 1, remoteAhead: 2, branches: Branches {
+                local: "",
+                remote: RemoteBranch{remote: "origin",   branch: "branch", exists: false},
+                parent: RemoteBranch{remote: "upstream", branch: "master", exists: false},
+            },
+        } : insertData(REMOTE_NO_SUCH_REMOTES, FormatData{
+            "PARENT_REMOTE_BRANCH": "upstream/master",
             "REMOTE_BRANCH":        "branch",
         }),
     }

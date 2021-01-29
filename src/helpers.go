@@ -72,6 +72,30 @@ func getRemoteInfo(branches Branches, remoteBehind uint, remoteAhead uint) strin
         });
     }
 
+    // There is an upstream branch set, but it does not exist
+    if (branches.remote.exists == false && branches.parent.exists == true) {
+        return insertData(REMOTE_NO_SUCH_UPSTREAM, FormatData{
+            "PARENT_REMOTE_BRANCH": parent,
+            "REMOTE_BRANCH":        remote,
+        });
+    }
+
+    // There is an upstream branch set, but it does not exist
+    if (branches.remote.exists == true && branches.parent.exists == false) {
+        return insertData(REMOTE_NO_SUCH_PARENT, FormatData{
+            "PARENT_REMOTE_BRANCH": parent,
+            "REMOTE_BRANCH":        remote,
+        });
+    }
+
+    // There is an upstream branch set, but it does not exist
+    if (branches.remote.exists == false && branches.parent.exists == false) {
+        return insertData(REMOTE_NO_SUCH_REMOTES, FormatData{
+            "PARENT_REMOTE_BRANCH": parent,
+            "REMOTE_BRANCH":        remote,
+        });
+    }
+
     if (remoteBehind > 0 && remoteAhead > 0) {
         return insertData(REMOTE_DIVERGED, FormatData{
             "PARENT_REMOTE_BRANCH": parent,

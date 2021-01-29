@@ -214,84 +214,62 @@ notification
 #### REMOTE_AHEAD
 
 This defines a string that is used if your current branch's remote is ahead of
-your parent. The `%s` and `%d` are placeholders for data that will be filled in
-from the code.
-
-`REMOTE_AHEAD` must exist, but you can change it to be whatever you want. Just
-make sure that the placeholders are in the same expected order.
+your parent.
 
 #### REMOTE_BEHIND
 
 This defines a string that is used if your current branch's remote is behind
-your parent. The `%s` and `%d` are placeholders for data that will be filled in
-from the code.
-
-`REMOTE_BEHIND` must exist, but you can change it to be whatever you want. Just
-make sure that the placeholders are in the same expected order.
+your parent.
 
 #### REMOTE_DIVERGED
 
 This defines a string that is used if your current branch's remote is both
-behind and ahead of your parent. The `%s` and `%d` are placeholders for data
-that will be filled in from the code.
-
-`REMOTE_DIVERGED` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
+behind and ahead of your parent.
 
 #### REMOTE_EQUAL
 
 This defines a string that is used if your current branch's remote neither
-behind, nor ahead of your parent. The `%s` and `%d` are placeholders for data
-that will be filled in from the code.
-
-`REMOTE_EQUAL` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
+behind, nor ahead of your parent.
 
 #### REMOTE_NOT_UPSTREAM
 
 This defines a string that is used if your branch isn't tracking a remote.
-The `%s` and `%d` are placeholders for data that will be filled in from the
-code.
 
-`REMOTE_NOT_UPSTREAM` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
+#### REMOTE_NO_SUCH_UPSTREAM
+
+This defines a string that is used if your branch is tracking a remote, but that
+remote branch doesn't exist.
+
+#### REMOTE_NO_SUCH_PARENT
+
+This defines a string that is used if your parent branch is tracking a remote,
+but that remote branch doesn't exist.
+
+#### REMOTE_NO_SUCH_REMOTES
+
+This defines a string that is used if both your branch and parent branch are
+tracking a remote, but both remote branches don't exist.
 
 #### REMOTE_SAME
 
 This defines a string that is used if your branch's remote, and its parent's
 remote are the same remote branch (usually only happens if you have your
-`master` branch checked out). The `%s` and `%d` are placeholders for data that
-will be filled in from the code.
-
-`REMOTE_SAME` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
+`master` branch checked out).
 
 #### LOCAL_AHEAD
 
 This defines a string that is used if your current local branch is ahead of its
-remote tracking branch. The `%s` and `%d` are placeholders for data that will be
-filled in from the code.
-
-`LOCAL_AHEAD` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
+remote tracking branch.
 
 #### LOCAL_BEHIND
 
 This defines a string that is used if your current local branch is behind its
-remote tracking branch. The `%s` and `%d` are placeholders for data that will be
-filled in from the code.
-
-`LOCAL_BEHIND` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
+remote tracking branch.
 
 #### LOCAL_DIVERGED
 
 This defines a string that is used if your current local branch is both behind
-and ahead of its remote tracking branch. The `%s` and `%d` are placeholders for
-data that will be filled in from the code.
-
-`LOCAL_DIVERGED` must exist, but you can change it to be whatever you want.
-Just make sure that the placeholders are in the same expected order.
+and ahead of its remote tracking branch.
 
 #### *_SYM
 
@@ -337,6 +315,47 @@ necessary.
 * If any tests are failing after your change, the code must be fixed before it
   will be merged (this may just be fixing the test if the expected behaviour of
   the code has changed).
+
+### Branching
+
+To summarize the below information:
+
+* `master` branch is considered stable and the latest release.
+* `dev` is what is slated for the next 'release'. This could be considered
+  'beta' in order to get newer features sooner. Bugs may appear here more often.
+
+All other branches are active development branches and should not be used except
+for testing or development.
+
+#### master
+
+The `master` branch is used as the 'latest release' branch. All code in this
+branch is considered to be working and tested.
+
+#### dev
+
+The `dev` branch is used as the 'next release' branch. All code in this branch
+has been tested, but is being kept separate from master until there is a certain
+confidence level that it works as expected.
+
+All development branches (with the exception of `hotfix` branches) should be
+branched from `dev`.
+
+#### Branches to Fix Github Issues
+
+Any branch created to resolve a Github issue should be in the form
+`GH-##/issue-description` where `##` is the issue number you are working on.
+Provide a description of the issue after a `/`.
+
+All changes that aren't hotfixes should be attached to a Github issue.
+
+#### Hotfixes
+
+Hotfix branches should take the form `hotfix/branch-description`. A hotfix is a
+small quick patch to fix something in `master`.
+
+Hotfixes should always be based on `master`, as a 'fix' for something in `dev`
+can be submitted as a different branch type.
 
 ### Testing
 

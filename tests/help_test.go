@@ -99,9 +99,13 @@ func TestGetExamples(T *testing.T) {
             description: "You are in your master branch and are tracking origin master",
             prompt: showPrompt(newGitData(GitData{
                 branches: Branches{
+                    parent: RemoteBranch{
+                        exists: true,
+                    },
                     remote: RemoteBranch{
                         remote: "origin",
                         branch: "master",
+                        exists: true,
                     },
                     local: "master",
                 },

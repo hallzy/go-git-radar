@@ -13,8 +13,8 @@ func TestGetArgs(T *testing.T) {
     output := getArgs();
 
     length := len(output);
-    if (length != 3) {
-        T.Errorf("getArgs(): Expected 1 element, got %d", length);
+    if (length != 2) {
+        T.Errorf("getArgs(): Expected 2 element, got %d", length);
     }
 }
 // }}}

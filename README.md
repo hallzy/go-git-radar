@@ -85,10 +85,7 @@ updated.
 
 ## Setup and Install
 
-Later I will probably provide releases but that hasn't happened yet.
-
-For now, there will be a binary in the repo you can use, with my configs or you
-can clone this repo and build it yourself.
+You can either download the latest release or clone the `master` branch.
 
 You will need to have golang installed in order to build it and you will need to
 copy the `config.go.example` to `config.go` and change any config options you
@@ -307,7 +304,6 @@ necessary.
 ## Contributing
 
 * Follow the code styles of the current files
-* Comment your code
 * Separate functions that perform side effects as much as possible to make
   testing easier
 * Every test should be passing after your change
@@ -315,6 +311,11 @@ necessary.
 * If any tests are failing after your change, the code must be fixed before it
   will be merged (this may just be fixing the test if the expected behaviour of
   the code has changed).
+
+### Versioning
+
+Release version numbers are based on the date of release: `vYY.MM.x`. For
+example, version `v21.2.3` would be the third release in February of 2021.
 
 ### Branching
 

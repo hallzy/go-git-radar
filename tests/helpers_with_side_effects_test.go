@@ -9,12 +9,13 @@ var skipCases = map[string]string{};
 
 // Test getArgs(){{{
 func TestGetArgs(T *testing.T) {
-    // The output is non deterministic, but it should have 3 elements
+    // The output is non deterministic, but it should 2 or 3 arguments when
+    // running tests (depending on the golang version)
     output := getArgs();
 
     length := len(output);
-    if (length != 2) {
-        T.Errorf("getArgs(): Expected 2 element, got %d", length);
+    if (length != 2 && length != 3) {
+        T.Errorf("getArgs(): Expected 2 or 3 elements, got %d", length);
     }
 }
 // }}}

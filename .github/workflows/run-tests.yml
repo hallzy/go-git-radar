@@ -19,4 +19,4 @@ jobs:
         go-version: 1.15
         
     - name: Run Tests
-      run: make && make test
+      run: .github/workflows/scripts/run_tests.sh

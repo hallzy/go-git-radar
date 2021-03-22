@@ -23,4 +23,4 @@ tests:
 	$(error "Test files are missing. Redownload from GitHub")
 
 clean:
-	rm git-radar
+	rm -f git-radar

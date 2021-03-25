@@ -148,7 +148,7 @@ func fetch(dotGit string) bool {
     }
 
     var preFetch   string = "( " + PRE_FETCH_CMD + " )";
-    var fetch      string = "( git fetch --prune --quiet && (" + FETCH_SUCCEEDED_CMD + ") || (" + FETCH_FAILED_CMD + ") )";
+    var fetch      string = "( git fetch --all --prune --quiet && (" + FETCH_SUCCEEDED_CMD + ") || (" + FETCH_FAILED_CMD + ") )";
     var outerFetch string = "( touch " + fetchingFile + " && " + fetch + " || ( " + FETCH_FAILED_CMD + " ) )";
 
     // run the fetch, and save the new fetch time in the fetch time file

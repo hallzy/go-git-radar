@@ -1,5 +1,7 @@
 # Go-Git-Radar
 
+[![paypal](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?business=QMDXUKQXRT75N&currency_code=CAD)
+
 This is a HUD for git repos.
 
 This project was inspired heavily on

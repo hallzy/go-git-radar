@@ -144,6 +144,36 @@ configuration in your local gitconfig file.
 If you don't set this git config variable, it will always compare you to
 origin/master.
 
+There is another alias I have which is the same thing as `cob` above, but is
+used to checkout PRs given a PR number. It defaults to looking for a remote
+named `upstream`, then resorts to `origin`, or you can specify a specific
+remote:
+
+```bash
+copr  = "!f() { \
+    remote=\"${2:-$(git remote | /bin/grep ^upstream || echo origin)}\"; \
+    git pr $1 $remote; \
+    git config --local branch.pr/$1.git-radar-tracked-remote $remote/master; \
+  }; \
+  f"
+```
+
+Example usage:
+
+```bash
+$ git copr 100
+$ git copr 100 specific-remote
+```
+
+NOTE: This alias depends on you having `git pr` already which is from
+`git extras`.
+
+Also, PRs are not really 'supported' shall we say, by git. What I mean by this
+is that as far as git is concerned, there is no remote tracking for a PR
+checkout, and you cannot see how far ahead or behind your local checkout is to
+the PR. In practise, this is probably fine because you shouldn't be doing
+development in a PR checkout anyways. It should just be for testing a PR.
+
 ### Configuration
 
 Have a look at the `config.go.example` file for all of the configurable options.

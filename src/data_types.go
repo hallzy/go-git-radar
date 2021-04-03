@@ -70,4 +70,5 @@ type RemoteBranch struct {
     remote string;
     branch string;
     exists bool;
+    isPR   bool;
 }

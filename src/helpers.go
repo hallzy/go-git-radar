@@ -36,12 +36,12 @@ func getFullRemote(remoteBranch RemoteBranch) string {
     return remoteBranch.remote + "/" + remoteBranch.branch;
 }
 
-func getFullName(remoteBranch RemoteBranch) string {
+func getPrintableRemote(remoteBranch RemoteBranch) string {
     if (remoteBranch.remote == "" || remoteBranch.branch == "") {
         return "";
     }
 
-    if (remoteBranch.remote == "origin") {
+    if (remoteBranch.remote == "origin" || remoteBranch.isPR) {
         return remoteBranch.branch;
     }
 
@@ -62,8 +62,8 @@ func insertData(str string, placeholderMap FormatData) string {
 // Given how many commits behind or ahead, return the formatted string used in
 // the prompt for remote info
 func getRemoteInfo(branches Branches, remoteBehind uint, remoteAhead uint) string {
-    var parent string = getFullName(branches.parent);
-    var remote string = getFullName(branches.remote);
+    var parent string = getPrintableRemote(branches.parent);
+    var remote string = getPrintableRemote(branches.remote);
 
     // If no remote, report the local branch as no upstream
     if (remote == "") {
@@ -417,4 +417,8 @@ func newGitData(git GitData) GitData {
     }
 
     return git;
+}
+
+func isPR(remoteFull string) bool {
+    return ezRegex("^refs/pull/[0-9]+/head$", remoteFull);
 }

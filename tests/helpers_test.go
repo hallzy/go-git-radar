@@ -219,7 +219,7 @@ func TestGetFullRemote(T *testing.T) {
     }
 }
 // }}}
-// Test getFullName{{{
+// Test getPrintableRemote{{{
 func TestGetFullName(T *testing.T) {
     inputExpected := map[RemoteBranch]string {
         RemoteBranch{remote: "origin",     branch: "master"}:             "master",
@@ -235,9 +235,9 @@ func TestGetFullName(T *testing.T) {
     }
 
     for input, expected := range inputExpected {
-        output := getFullName(input);
+        output := getPrintableRemote(input);
         if (output != expected) {
-            T.Errorf("getFullName(): Got [%s], expected [%s] for input [%+v]", output, expected, input);
+            T.Errorf("getPrintableRemote(): Got [%s], expected [%s] for input [%+v]", output, expected, input);
         }
     }
 }
@@ -642,6 +642,26 @@ func TestNewGitData(T *testing.T) {
         output := newGitData(input);
         if (output != expected) {
             T.Errorf("newGitData(): Got [%+v], expected [%+v] for input [%+v]", output, expected, input);
+        }
+    }
+}
+// }}}
+// Test newIsPR{{{
+func TestIsPR(T *testing.T) {
+    inputExpected := map[string]bool {
+        "refs/pull/1/head":        true,
+        "refs/pull/12345/head":    true,
+        "efs/pull/1/head":         false,
+        "refs/pull/1/hea":         false,
+        "origin/refs/pull/1/head": false,
+        "refs/pull/a/head":        false,
+        "refs/pull//head":         false,
+    }
+
+    for input, expected := range inputExpected {
+        output := isPR(input);
+        if (output != expected) {
+            T.Errorf("isPR(): Got [%t], expected [%t] for input [%s]", output, expected, input);
         }
     }
 }

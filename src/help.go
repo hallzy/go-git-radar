@@ -344,6 +344,25 @@ func help() string {
                 },
             })),
         },
+        {
+            description: "Current have PR #355 checked out",
+            prompt: showPrompt(newGitData(GitData{
+                branches: Branches{
+                    remote: RemoteBranch{
+                        remote: "upstream",
+                        branch: "pr/355",
+                        exists: false,
+                        isPR: true,
+                    },
+                    parent: RemoteBranch{
+                        remote: "upstream",
+                        branch: "master",
+                        exists: true,
+                    },
+                    local: "pr/355",
+                },
+            })),
+        },
     };
 
     var ret string = "\n";

@@ -61,8 +61,14 @@ func getGitData() GitData {
             defer wg2.Done();
             localBranch         = getLocalBranchName();
             remoteBranch        = getRemoteBranchName(localBranch);
+
+            if (isPR(remoteBranch.branch)) {
+                remoteBranch.branch = localBranch;
+                remoteBranch.isPR = true;
+            }
+
             remoteFull          = getFullRemote(remoteBranch);
-            remoteBranch.exists = doesRemoteExist(remoteFull);
+            remoteBranch.exists = !remoteBranch.isPR && doesRemoteExist(remoteFull);
         }();
 
         go func() {
@@ -213,10 +219,8 @@ func getRemoteBranchName(localBranch string) RemoteBranch {
         return ret;
     }
 
-    // Return the remote and branch name together
     ret.remote = remote;
     ret.branch = remoteMergeBranch;
-
     return ret;
 }
 

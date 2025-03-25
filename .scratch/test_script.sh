@@ -12,7 +12,7 @@ fi
 
 rm testfile-shouldnt-exist.txt > /dev/null 2>&1
 
-results="$(go test -v -coverprofile=coverage.tmp)"
+results="$(GO111MODULE=off go test -v -coverprofile=coverage.tmp)"
 testSucceeded=$?
 
 

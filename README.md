@@ -142,7 +142,8 @@ This will create a new branch and check it out for you, but will also set the
 configuration in your local gitconfig file.
 
 If you don't set this git config variable, it will always compare you to
-origin/master.
+`origin/<default>` where `<default>` is `main`, `trunk` or `master`, whichever
+exists in the repository.
 
 There is another alias I have which is the same thing as `cob` above, but is
 used to checkout PRs given a PR number. It defaults to looking for a remote

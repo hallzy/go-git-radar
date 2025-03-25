@@ -236,14 +236,37 @@ func doesRemoteExist(remoteFull string) bool {
     return true;
 }
 
-// Get the remote branch that the current branch is based on
-func getParentRemote() RemoteBranch {
-    // Every branch is based on something, so if we can't find what that is,
-    // assume we are basing it off of origin master
-    defaultRemote := RemoteBranch{
+// Determine the default remote
+func getDefaultRemote() RemoteBranch {
+    // Does the "main" branch exist?
+    mainBranch, err := runCmd("git branch --list main");
+    if (err == nil && mainBranch != "") {
+        return RemoteBranch{
+            remote: "origin",
+            branch: "main",
+        }
+    }
+
+    // Does the "trunk" branch exist?
+    trunkBranch, err := runCmd("git branch --list trunk");
+    if (err == nil && trunkBranch != "") {
+        return RemoteBranch{
+            remote: "origin",
+            branch: "trunk",
+        }
+    }
+
+    return RemoteBranch{
         remote: "origin",
         branch: "master",
     }
+}
+
+// Get the remote branch that the current branch is based on
+func getParentRemote() RemoteBranch {
+    // Every branch is based on something, so if we can't find what that is,
+    // assume we are basing it off of a default remote
+    defaultRemote := getDefaultRemote();
 
     // Get the name of the currently checked out branch
     out1, err := runCmd("git rev-parse --abbrev-ref HEAD");

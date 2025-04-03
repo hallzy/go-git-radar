@@ -10,6 +10,7 @@ import (
     "os/exec"
     "io/ioutil"
     "time"
+    "syscall"
 )
 
 // Get command line arguments
@@ -56,6 +57,10 @@ func getCwd() string {
 // Run a command, but don't wait for it to finish
 func runCmdConcurrent(cmdStr string) {
     cmd := exec.Command("/bin/sh", "-c", cmdStr);
+    cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true};
+    cmd.Stdout = nil;
+    cmd.Stderr = nil;
+
     err := cmd.Start();
 
     if (err != nil) {
